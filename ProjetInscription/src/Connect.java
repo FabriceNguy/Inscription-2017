@@ -30,29 +30,23 @@ import com.mysql.jdbc.CallableStatement;
 public class Connect {
 	
 	private Connection conn;
-
+	private static Inscriptions inscriptions;
 
 	
    public static void main(String[]args){
        Connect c = new Connect();
        SortedSet<Competition> competitions = new TreeSet<Competition>() ;
-//     LocalDate dateCloture = LocalDate.of(2017,Month.APRIL,10);
-//     LocalDate newDate = LocalDate.of(2015,Month.APRIL,25);
-//     //c.setDateComp(newDate,2);
-//     //c.addComp("Tennis", dateCloture, false);
-//     //c.addPersonne("NGUY", "Fabrice", "fabrice.nguy@gmail.com");
-//     //c.addComp("basketball", dateCloture, true);
-//     //c.addEquipe("Zea");
-//     //System.out.println(c.getNameCandidat(3));
-//     // c.addMembreEquipe(1, 3);
-//     //c.addMembreEquipe(17, 18);
-//     //System.out.println(c.getDateComp(1));
-//     //LocalDate date = LocalDate.now();
-//     //System.out.println(c.CompOuverte(1));
-//     System.out.println(c.enEquipeComp(1));
+       SortedSet<Equipe> equipes = new TreeSet<Equipe>() ;
+
       try {
-		  int taille = c.getCompetitions().size();
+    	  equipes = c.getCandidatEquipe();
+		  int taille = c.getCandidatEquipe().size();
 		  System.out.println("taille "+taille);
+		  Iterator<Equipe> iterator =  equipes.iterator();
+		  while (iterator.hasNext()) {
+			System.out.println(iterator.next());
+		  
+		}
 	} catch (SQLException e) {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
@@ -109,102 +103,8 @@ public class Connect {
     }
 
  }
- public static boolean requeteBoolean(String requete, String nomChamp) {
 
-	  // Information d'accès à la base de données
-	  Boolean Resultat = null;  
-	  Connection cn = null;
-	  Statement st = null;
-	  ResultSet rs = null;
-	  String url = "jdbc:mysql://localhost/inscription2017?useSSL=false";
-	  String login= "root";
-	  String passwd = "";
-	  
-	  try {
-
-	   // Etape 1 : Chargement du driver
-	   Class.forName("com.mysql.jdbc.Driver");
-
-	   // Etape 2 : récupération de la connexion
-	   cn = DriverManager.getConnection(url, login, passwd);
-
-	   // Etape 3 : Création d'un statement
-	   st = cn.createStatement();
-
-	   String sql = requete;
-
-	   // Etape 4 : exécution requête
-	   rs = st.executeQuery(sql);
-
-	   if(rs.first()){
-	      Resultat = rs.getBoolean(nomChamp);
-	      } 
-	   return Resultat; 
-	  
-	  } catch (SQLException e) {
-	   e.printStackTrace();
-	  } catch (ClassNotFoundException e) {
-	   e.printStackTrace();
-	  } finally {
-	   try {
-	  
-	    cn.close();
-	    st.close();
-	   } catch (SQLException e) {
-	    e.printStackTrace();
-	   }
-	  }
-	  return false;
-
-	 }
- public static String readBDD(String requete, String nomChamp) {
-
-  // Information d'accès à la base de données
-  String Resultat = null;  
-  Connection cn = null;
-  Statement st = null;
-  ResultSet rs = null;
-  String url = "jdbc:mysql://localhost/inscription2017?useSSL=false";
-  String login= "root";
-  String passwd = "";
-  
-  try {
-
-   // Etape 1 : Chargement du driver
-   Class.forName("com.mysql.jdbc.Driver");
-
-   // Etape 2 : récupération de la connexion
-   cn = DriverManager.getConnection(url, login, passwd);
-
-   // Etape 3 : Création d'un statement
-   st = cn.createStatement();
-
-   String sql = requete;
-
-   // Etape 4 : exécution requête
-   rs = st.executeQuery(sql);
-
-   if(rs.first()){
-      Resultat = rs.getString(nomChamp);
-      } 
-   return Resultat; 
-  
-  } catch (SQLException e) {
-   e.printStackTrace();
-  } catch (ClassNotFoundException e) {
-   e.printStackTrace();
-  } finally {
-   try {
-  
-    cn.close();
-    st.close();
-   } catch (SQLException e) {
-    e.printStackTrace();
-   }
-  }
-  return null;
-
- }
+ 
  public ResultSet resultatRequete(String requete) {
 
 	  // Information d'accès à la base de données
@@ -249,13 +149,10 @@ public class Connect {
  public void setNameCandidat(String prenom,int id){
    requete("call SET_NAME_CANDIDAT('"+prenom+"','"+id+"')");
  }
- public void delCandidat(int id){
-   requete("call DEL_CANDIDAT('"+id+"')");
+ public void delCandidat(Candidat candidat){
+   requete("call DEL_CANDIDAT('"+candidat.getIdCandidat()+"')");
  }
- public String getNameCandidat(int id){
-	 String resultat = Connect.readBDD("call GET_NAME_CANDIDAT('"+id+"')","NomCandidat");
-	 return resultat;
-}
+
  /*competition*/
  
  public SortedSet<Competition> getCompetitions() throws SQLException{
@@ -263,17 +160,17 @@ public class Connect {
 	 inscription = Inscriptions.getInscriptions();
 	 SortedSet<Competition> competitions = new TreeSet<Competition>();
 	 
-	 ResultSet rs = resultatRequete("SELECT * FROM Competition WHERE NomComp ='Tennis'");
+	 ResultSet rs = resultatRequete("SELECT * FROM Competition");
 	 while(rs.next()){
 		int num = rs.getInt("NumComp");
 		String nom = rs.getString("NomComp");
-		LocalDate date =rs.getDate("DateCloture").toLocalDate();
+		LocalDate date = rs.getDate("DateCloture").toLocalDate();
 		Boolean enEquipe = rs.getBoolean("EnEquipe");
 		System.out.println("num"+num+"nom "+nom+" date: "+ date+""+enEquipe+"");
 		Competition competition = inscription.createCompetition(nom,
 				 date, 
 				 enEquipe); 
-		 competitions.add(competition);
+		competitions.add(competition);
 		 
 	 }
 	 
@@ -283,7 +180,8 @@ public class Connect {
    requete("call ADD_COMP('"+competition.getNom()+"','"+
 		   competition.getDateCloture()+"',"+competition.estEnEquipe()+")");
    // TODO récupérer l'ID
-   // ....
+   // a faire procedure get Id
+   /*	requete("call")
 //   competition.setId(/* */);
  }
  
@@ -293,109 +191,65 @@ public class Connect {
  public void setDateComp(LocalDate newDate,int id){
    requete("call SET_DATE_COMP('"+newDate+"','"+id+"')");
  }
- public String getNameComp(int id){  
-    String resultat = Connect.readBDD("call GET_NAME_COMP('"+id+"')","NomComp");
-    return resultat;
-}
-public Boolean CompOuverte(int id){  
-	    
-	    Date today = Date.valueOf(LocalDate.now());
-		Date dateCloture = getDateComp(id);
-		
-		Boolean resultat = dateCloture.after(today);
-		return resultat;
-}
 
- public Date getDateComp(int id) {
-
-    // Information d'accès à la base de données
-    Date Resultat = null;  
-    Connection cn = null;
-    Statement st = null;
-    ResultSet rs = null;
-    String url = "jdbc:mysql://localhost/inscription2017?useSSL=false";
-    String login= "root";
-    String passwd = "";
-    
-    try {
-
-     // Etape 1 : Chargement du driver
-     Class.forName("com.mysql.jdbc.Driver");
-
-     // Etape 2 : récupération de la connexion
-     cn = DriverManager.getConnection(url, login, passwd);
-
-     // Etape 3 : Création d'un statement
-     st = cn.createStatement();
-
-     String sql = ("call date_cloture('"+id+"')");
-
-     // Etape 4 : exécution requête
-     rs = st.executeQuery(sql);
-
-     if(rs.first()){
-        Resultat = rs.getDate("DateCloture");
-        } 
-     return Resultat; 
-    
-    } catch (SQLException e) {
-     e.printStackTrace();
-    } catch (ClassNotFoundException e) {
-     e.printStackTrace();
-    } finally {
-     try {
-    
-      cn.close();
-      st.close();
-     } catch (SQLException e) {
-      e.printStackTrace();
-     }
-    }
-    return null;
-
-   }
- public boolean enEquipeComp(int id){
-	   return Connect.requeteBoolean("call EN_EQUIPE_COMP('"+id+"')","EnEquipe");
- }
  public void delComp(int id){
 	   requete("call DEL_COMP('"+id+"')");
  }
  /*Personne*/
- public void add(Personne p){
-   requete("call ADD_PERSONNE('"+p.getNom()+
-		   "','"+p.getMail()+
-		   "','"+p.getPrenom()+"')");
+ 
+ public void add(Personne personne){
+   requete("call ADD_PERSONNE('"+personne.getNom()+
+		   "','"+personne.getMail()+
+		   "','"+personne.getPrenom()+"')");
  }
+ 
  public void setPrenomPersonne(String prenom,int id){
    requete("call SET_PRENOM_PERSONNE('"+prenom+"','"+id+"')");
  }
  public void setMailPersonne(String mail,int id){
    requete("call SET_MAIL_PERSONNE('"+mail+"','"+id+"')");
  }
- public String getPrenomPersonne(int id){  
-  String resultat = Connect.readBDD("call GET_PRENOM_PERSONNE('"+id+"')","PrenomPersonne");
-  return resultat;
- }
- public String getMailPersonne(int id){  
-  String resultat = Connect.readBDD("call GET_MAIL('"+id+"')","MailPers");
-  return resultat;
+
+ public SortedSet<Equipe> getCandidatEquipe() throws SQLException{
+	 Inscriptions inscription;
+	 inscription = Inscriptions.getInscriptions();
+	 SortedSet<Equipe> equipes = new TreeSet<Equipe>();
+	 
+	 ResultSet rs = resultatRequete("SELECT * FROM Candidat");
+	 while(rs.next()){
+		
+		String nom = rs.getString("NomCandidat");
+		System.out.println("nom "+nom+" ");
+		Equipe equipe = inscription.createEquipe(nom); 
+		
+		equipes.add(equipe);
+		 
+	 }
+	 
+	 return equipes;
  }
  /*Equipe*/
  public void add(Equipe equipe){
    requete("call ADD_EQUIPE('"+equipe.getNom()+"')");
  }
  
- public void addMembreEquipe(int idEquipe,int idPersonne){
-   requete("call ADD_MEMBRE('"+idEquipe+"','"+idPersonne+"')");
+ public void addMembreEquipe(Equipe equipe,Personne personne){
+   requete("call ADD_MEMBRE('"+equipe.getIdCandidat()+"','"+personne.getIdCandidat()+"')");
  }
- public void delMembreEquipe(int idEquipe,int idPersonne){
-	   requete("call DEL_MEMBRE('"+idEquipe+"','"+idPersonne+"')");
+ public void delMembreEquipe(Equipe equipe,Personne personne){
+	   requete("call DEL_MEMBRE('"+equipe.getIdCandidat()+"','"+personne.getIdCandidat()+"')");
  }
  /*Participation*/
- public void addParticipation(int idCandidat, int idComp){
-	   requete("call ADD_PARTICIPATION('"+idCandidat+"','"+idComp+"')");
+ public void addParticipation(Candidat candidat, int id){
+	   requete("call ADD_PARTICIPATION('"+candidat.getIdCandidat()+"','"+id+"')");
  }
- public void delParticipation(int idCandidat, int idComp){
-	   requete("call DEL_PARTICIPATION('"+idCandidat+"','"+idComp+"')");
+ public void delParticipation(Candidat candidat, Competition competition){
+	   requete("call DEL_PARTICIPATION('"+candidat.getIdCandidat()+"','"+competition.getId()+"')");
+}
+//a faire
+public void delCompetition(Competition competition) {
+	requete("call DEL_COMP('"+competition.getId()+"'");
+	// TODO Auto-generated method stub
+	
 } 
 }

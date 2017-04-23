@@ -32,7 +32,7 @@ public class Personne extends Candidat
 	
 	public String getPrenom()
 	{
-		return c.getPrenomPersonne(this.getIdCandidat());
+		return prenom;
 	}
 
 	/**
@@ -49,12 +49,10 @@ public class Personne extends Candidat
 	 * Retourne l'adresse électronique de la personne.
 	 * @return
 	 */
-	
-	public String getMail()
-	{
-		return c.getMailPersonne(this.getIdCandidat());
+	public String getMail() {
+		// TODO Auto-generated method stub
+		return mail;
 	}
-
 	/**
 	 * Modifie l'adresse électronique de la personne.
 	 * @param mail
@@ -98,4 +96,6 @@ public class Personne extends Candidat
 	{
 		return super.toString() + " membre de " + equipes.toString();
 	}
+
+
 }

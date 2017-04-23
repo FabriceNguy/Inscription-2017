@@ -16,11 +16,14 @@ import java.util.TreeSet;
 public class Competition implements Comparable<Competition>, Serializable
 {
 	private static final long serialVersionUID = -2882150118573759729L;
+	private static final boolean Serializable = true;
 	private Inscriptions inscriptions;
 	private String nom;
 	private Set<Candidat> candidats;
 	private LocalDate dateCloture;
 	private boolean enEquipe = false;
+	private int id;
+	private Connect connect;
 	
 	
 	Competition(Inscriptions inscriptions, String nom, LocalDate dateCloture, boolean enEquipe)
@@ -49,6 +52,8 @@ public class Competition implements Comparable<Competition>, Serializable
 	public void setNom(String nom)
 	{
 		this.nom = nom ;
+		if(Serializable)
+			connect.setNameComp(nom,getId());
 	}
 	
 	/**
@@ -125,6 +130,8 @@ public class Competition implements Comparable<Competition>, Serializable
 		if (enEquipe || this.inscriptionsOuvertes()==true)
 			throw new RuntimeException();
 		personne.add(this);
+		if(Serializable)
+			connect.addParticipation((Candidat)personne, getId());
 		return candidats.add(personne);
 	}
 
@@ -142,9 +149,10 @@ public class Competition implements Comparable<Competition>, Serializable
 		if (!enEquipe || this.inscriptionsOuvertes()==true)
 			throw new RuntimeException();
 		equipe.add(this);
+		if(Serializable)
+			connect.addParticipation((Candidat)equipe, getId());
 		return candidats.add(equipe);
 	}
-
 	/**
 	 * Désinscrit un candidat.
 	 * @param candidat
@@ -166,6 +174,8 @@ public class Competition implements Comparable<Competition>, Serializable
 		for (Candidat candidat : candidats)
 			remove(candidat);
 		inscriptions.remove(this);
+//		if(Serializable)
+//			connect.delParticipation(candidats., idComp);
 	}
 	
 	@Override
@@ -178,5 +188,13 @@ public class Competition implements Comparable<Competition>, Serializable
 	public String toString()
 	{
 		return getNom();
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 }

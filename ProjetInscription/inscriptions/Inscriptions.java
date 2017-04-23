@@ -1,5 +1,6 @@
 package inscriptions;
 import src.Connect;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -7,6 +8,8 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Collections;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.SortedSet;
@@ -39,7 +42,32 @@ public class Inscriptions implements Serializable
 	 */
 	
 	public SortedSet<Competition> getCompetitions()
+	
 	{
+		SortedSet<Competition> competitions = new TreeSet<Competition>();
+		 
+		 ResultSet rs = connect.resultatRequete("SELECT * FROM Competition");
+		 try {
+			while(rs.next()){
+				int num = rs.getInt("NumComp");
+				String nom = rs.getString("NomComp");
+				LocalDate date = rs.getDate("DateCloture").toLocalDate();
+				Boolean enEquipe = rs.getBoolean("EnEquipe");
+				System.out.println("num"+num+"nom "+nom+" date: "+ date+""+enEquipe+"");
+				Competition competition = new Competition( inscriptions,nom,
+						 date, 
+						 enEquipe); 
+				competitions.add(competition);
+				 
+			 }
+		} catch (SQLException e) {
+			System.out.println("Erreur de connection à la BDD");
+			e.printStackTrace();
+		}
+		finally{
+			connect.close();
+		}
+		 
 		return Collections.unmodifiableSortedSet(competitions);
 	}
 	
@@ -61,6 +89,23 @@ public class Inscriptions implements Serializable
 	public SortedSet<Personne> getPersonnes()
 	{
 		SortedSet<Personne> personnes = new TreeSet<Personne>();
+		ResultSet rs = connect.resultatRequete("SELECT * "
+				+ "FROM Candidat, Personne"
+				+ "WHERE Equipe = 0 "
+				+ "AND Equipe.NumCandPersonne = Candidat.NumCandidat");
+		try {
+			while(rs.next()){				
+
+				Personne personne = new Personne( inscriptions
+						,rs.getString("NomCandidat")
+						,rs.getString("PrenomPersonne"),rs.getString("MailPersonne")); 
+				personnes.add(personne);
+				 
+			 }
+		} catch (SQLException e) {
+			System.out.println("Erreur de connection à la BDD");
+			e.printStackTrace();
+		}
 		for (Candidat c : getCandidats())
 			if (c instanceof Personne)
 				personnes.add((Personne)c);
@@ -75,9 +120,23 @@ public class Inscriptions implements Serializable
 	public SortedSet<Equipe> getEquipes()
 	{
 		SortedSet<Equipe> equipes = new TreeSet<>();
+		ResultSet rs = connect.resultatRequete("SELECT * FROM Candidat WHERE Equipe=1");
+		try {
+			while(rs.next()){				
+
+				Equipe equipe = new Equipe( inscriptions,rs.getString("NomCandidat")); 
+				equipes.add(equipe);
+				 
+			 }
+		} catch (SQLException e) {
+			System.out.println("Erreur de connection à la BDD");
+			e.printStackTrace();
+		}
+		/* 
 		for (Candidat c : getCandidats())
 			if (c instanceof Equipe)
 				equipes.add((Equipe)c);
+		*/
 		return Collections.unmodifiableSortedSet(equipes);
 	}
 
@@ -133,20 +192,22 @@ public class Inscriptions implements Serializable
 		if (!SERIALIZE)
 			//TODO ADD EQUIPE CONNECT
 			candidats.add(equipe);
-		connect.add(equipe);
+		else
+			connect.add(equipe);
 		return equipe;
 	}
 	
 	void remove(Competition competition)
 	{
 		competitions.remove(competition);
-		connect.delete(competition);
+		connect.delCompetition(competition);
+		//connect.delete(competition);
 	}
 	
 	void remove(Candidat candidat)
 	{
 		candidats.remove(candidat);
-		connect.delete(candidat);
+		connect.delCandidat(candidat);
 	}
 	
 	/**
@@ -257,7 +318,8 @@ public class Inscriptions implements Serializable
 	{
 		LocalDate date = LocalDate.of(2017,Month.APRIL,10);
 		Inscriptions inscriptions = Inscriptions.getInscriptions();
-		Competition flechettes = inscriptions.createCompetition("Mondial de fléchettes", date, false);
+		SortedSet<Competition> competitions = new TreeSet<Competition>();
+		/*Competition flechettes = inscriptions.createCompetition("Mondial de fléchettes", date, false);
 		Personne tony = inscriptions.createPersonne("Tony", "Dent de plomb", "azerty"), 
 				boris = inscriptions.createPersonne("Boris", "le Hachoir", "ytreza");
 		flechettes.add(tony);
@@ -275,7 +337,8 @@ public class Inscriptions implements Serializable
 		{
 			System.out.println("Sauvegarde impossible." + e);
 		}
-		
+		*/
+		competitions = inscriptions.getCompetitions();
 	}
 	
 	
