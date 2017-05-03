@@ -31,13 +31,14 @@ public class Connect {
 	
 	private Connection conn;
 	private static Inscriptions inscriptions;
+	private ArrayList<Integer> idMembreEquipe;
 
 	
    public static void main(String[]args){
        Connect c = new Connect();
        SortedSet<Competition> competitions = new TreeSet<Competition>() ;
        SortedSet<Equipe> equipes = new TreeSet<Equipe>() ;
-
+/*
       try {
     	  equipes = c.getCandidatEquipe();
 		  int taille = c.getCandidatEquipe().size();
@@ -51,6 +52,7 @@ public class Connect {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
+	*/
        c.close();
 //       for (Competition competition : competitions) {
 //    	   System.out.println(competition.getNom());
@@ -145,44 +147,32 @@ public class Connect {
 
 	 } 
  /*Candidat*/
-// public List<Candidat>
+
  public void setNameCandidat(String prenom,int id){
    requete("call SET_NAME_CANDIDAT('"+prenom+"','"+id+"')");
  }
- public void delCandidat(Candidat candidat){
-   requete("call DEL_CANDIDAT('"+candidat.getIdCandidat()+"')");
+ public void delCandidat(int idCandidat){
+   requete("call DEL_CANDIDAT('"+idCandidat+"')");
  }
 
  /*competition*/
  
- public SortedSet<Competition> getCompetitions() throws SQLException{
-	 Inscriptions inscription;
-	 inscription = Inscriptions.getInscriptions();
-	 SortedSet<Competition> competitions = new TreeSet<Competition>();
-	 
-	 ResultSet rs = resultatRequete("SELECT * FROM Competition");
-	 while(rs.next()){
-		int num = rs.getInt("NumComp");
-		String nom = rs.getString("NomComp");
-		LocalDate date = rs.getDate("DateCloture").toLocalDate();
-		Boolean enEquipe = rs.getBoolean("EnEquipe");
-		System.out.println("num"+num+"nom "+nom+" date: "+ date+""+enEquipe+"");
-		Competition competition = inscription.createCompetition(nom,
-				 date, 
-				 enEquipe); 
-		competitions.add(competition);
-		 
-	 }
-	 
-	 return competitions;
- }
- public void add(Competition competition){
+
+ public void add(Competition competition) throws SQLException{
+	ResultSet rs =null;
    requete("call ADD_COMP('"+competition.getNom()+"','"+
 		   competition.getDateCloture()+"',"+competition.estEnEquipe()+")");
+	rs = resultatRequete("Select NumComp FROM Competition");
+	while (rs.next()) {
+		if (rs.last()) {
+			competition.setId(rs.getInt("NumComp"));
+		}
+		
+	
+	}
    // TODO récupérer l'ID
-   // a faire procedure get Id
-   /*	requete("call")
-//   competition.setId(/* */);
+   
+
  }
  
  public void setNameComp(String newName,int id){
@@ -197,10 +187,20 @@ public class Connect {
  }
  /*Personne*/
  
- public void add(Personne personne){
-   requete("call ADD_PERSONNE('"+personne.getNom()+
-		   "','"+personne.getMail()+
-		   "','"+personne.getPrenom()+"')");
+ public void add(Personne personne) throws SQLException{
+	 ResultSet rs = null;
+	 requete("call ADD_PERSONNE('"+personne.getNom()+
+			"','"+personne.getMail()+
+		   	"','"+personne.getPrenom()+"')");
+	 rs = resultatRequete("Select NumCandidat FROM Candidat");
+	 while (rs.next()) {
+		 if (rs.last()) {
+			 
+			 personne.setIdCandidat(rs.getInt("NumCandidat"));
+		 }
+		
+	
+	}
  }
  
  public void setPrenomPersonne(String prenom,int id){
@@ -210,46 +210,41 @@ public class Connect {
    requete("call SET_MAIL_PERSONNE('"+mail+"','"+id+"')");
  }
 
- public SortedSet<Equipe> getCandidatEquipe() throws SQLException{
-	 Inscriptions inscription;
-	 inscription = Inscriptions.getInscriptions();
-	 SortedSet<Equipe> equipes = new TreeSet<Equipe>();
-	 
-	 ResultSet rs = resultatRequete("SELECT * FROM Candidat");
-	 while(rs.next()){
-		
-		String nom = rs.getString("NomCandidat");
-		System.out.println("nom "+nom+" ");
-		Equipe equipe = inscription.createEquipe(nom); 
-		
-		equipes.add(equipe);
-		 
-	 }
-	 
-	 return equipes;
- }
+
  /*Equipe*/
- public void add(Equipe equipe){
-   requete("call ADD_EQUIPE('"+equipe.getNom()+"')");
+ public void add(Equipe equipe) throws SQLException{
+	 ResultSet rs = null;
+	 requete("call ADD_EQUIPE('"+equipe.getNom()+"')");
+	 rs = resultatRequete("Select NumCandidat FROM Candidat");
+	 while (rs.next()) {
+		 if (rs.last()) {
+			 
+			 equipe.setIdCandidat(rs.getInt("NumCandidat"));
+		 }
+		
+	
+	}
+   
  }
  
- public void addMembreEquipe(Equipe equipe,Personne personne){
-   requete("call ADD_MEMBRE('"+equipe.getIdCandidat()+"','"+personne.getIdCandidat()+"')");
+ public void addMembreEquipe(int idEquipe,int idPersonne){
+   requete("call ADD_MEMBRE('"+idEquipe+"','"+idPersonne+"')");
  }
- public void delMembreEquipe(Equipe equipe,Personne personne){
-	   requete("call DEL_MEMBRE('"+equipe.getIdCandidat()+"','"+personne.getIdCandidat()+"')");
+ public void delMembreEquipe(int idEquipe,int idPersonne){
+	   requete("call DEL_MEMBRE('"+idEquipe+"','"+idPersonne+"')");
  }
+
  /*Participation*/
- public void addParticipation(Candidat candidat, int id){
-	   requete("call ADD_PARTICIPATION('"+candidat.getIdCandidat()+"','"+id+"')");
+ public void addParticipation(int idCand, int idComp){
+	   requete("call ADD_PARTICIPATION('"+idCand+"','"+idComp+"')");
  }
- public void delParticipation(Candidat candidat, Competition competition){
-	   requete("call DEL_PARTICIPATION('"+candidat.getIdCandidat()+"','"+competition.getId()+"')");
+ public void delParticipation(int idCand, int idComp){
+	   requete("call DEL_PARTICIPATION('"+idCand+"','"+idComp+"')");
 }
-//a faire
+
 public void delCompetition(Competition competition) {
 	requete("call DEL_COMP('"+competition.getId()+"'");
-	// TODO Auto-generated method stub
+	
 	
 } 
 }

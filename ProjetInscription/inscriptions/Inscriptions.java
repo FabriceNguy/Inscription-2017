@@ -26,13 +26,13 @@ public class Inscriptions implements Serializable
 	private static final long serialVersionUID = -3095339436048473524L;
 	private static final String FILE_NAME = "Inscriptions.srz";
 	private static Inscriptions inscriptions;
-	private Connect connect;
+	private Connect connect = new Connect();
 	private SortedSet<Competition> competitions = new TreeSet<Competition>();
 	private SortedSet<Candidat> candidats = new TreeSet<Candidat>();
 	public static boolean SERIALIZE = false; 
 	
 	
-	private Inscriptions()
+	public Inscriptions()
 	{
 	}
 	
@@ -45,28 +45,28 @@ public class Inscriptions implements Serializable
 	
 	{
 		SortedSet<Competition> competitions = new TreeSet<Competition>();
-		 
-		 ResultSet rs = connect.resultatRequete("SELECT * FROM Competition");
-		 try {
-			while(rs.next()){
-				int num = rs.getInt("NumComp");
-				String nom = rs.getString("NomComp");
-				LocalDate date = rs.getDate("DateCloture").toLocalDate();
-				Boolean enEquipe = rs.getBoolean("EnEquipe");
-				System.out.println("num"+num+"nom "+nom+" date: "+ date+""+enEquipe+"");
-				Competition competition = new Competition( inscriptions,nom,
-						 date, 
-						 enEquipe); 
-				competitions.add(competition);
-				 
-			 }
-		} catch (SQLException e) {
-			System.out.println("Erreur de connection à la BDD");
-			e.printStackTrace();
-		}
-		finally{
-			connect.close();
-		}
+		 if(!SERIALIZE){
+			 ResultSet rs = connect.resultatRequete("SELECT * FROM competition");
+			 try {
+				while(rs.next()){
+					int num = rs.getInt("NumComp");
+					String nom = rs.getString("NomComp");
+					LocalDate date = rs.getDate("DateCloture").toLocalDate();
+					Boolean enEquipe = rs.getBoolean("EnEquipe");
+					System.out.println("num"+num+"nom "+nom+" date: "+ date+""+enEquipe+"");
+					Competition competition = new Competition( inscriptions,
+							nom,
+							date, 
+							enEquipe); 
+					competitions.add(competition);
+					this.competitions.add(competition);
+					 
+				 }
+			} catch (SQLException e) {
+				System.out.println("Erreur de connection à la BDD");
+				e.printStackTrace();
+			}
+		 }
 		 
 		return Collections.unmodifiableSortedSet(competitions);
 	}
@@ -78,6 +78,43 @@ public class Inscriptions implements Serializable
 	
 	public SortedSet<Candidat> getCandidats()
 	{
+		ResultSet rs = connect.resultatRequete("SELECT * "
+				+ "FROM Candidat as c, Personne as p "
+				+ "WHERE c.NumCandidat = p.NumCandidatPers");
+		try {
+			while(rs.next()){				
+
+				Personne personne = new Personne( inscriptions
+						,rs.getString("NomCandidat")
+						,rs.getString("PrenomPersonne")
+						,rs.getString("MailPers")); 
+				candidats.add(personne);
+				this.candidats.add(personne);
+				 
+			 }
+		} catch (SQLException e) {
+			System.out.println("Erreur de connection à la BDD");
+			e.printStackTrace();
+		}
+		
+			ResultSet rs1 = connect.resultatRequete("SELECT * "
+					+ "FROM Candidat "
+					+ "WHERE NumCandidat NOT IN "
+					+ "(SELECT NumCandidatPers "
+					+ "FROM Personne)");
+			try {
+				while(rs1.next()){				
+	
+					Equipe equipe = new Equipe( inscriptions,rs1.getString("NomCandidat")); 
+					equipe.setIdCandidat(rs1.getInt("NumCandidat"));
+					candidats.add(equipe);
+					this.candidats.add(equipe);
+				 }
+			} catch (SQLException e) {
+				System.out.println("Erreur de connection à la BDD");
+				e.printStackTrace();
+			}
+		
 		return Collections.unmodifiableSortedSet(candidats);
 	}
 
@@ -88,28 +125,14 @@ public class Inscriptions implements Serializable
 	
 	public SortedSet<Personne> getPersonnes()
 	{
+		
 		SortedSet<Personne> personnes = new TreeSet<Personne>();
-		ResultSet rs = connect.resultatRequete("SELECT * "
-				+ "FROM Candidat, Personne"
-				+ "WHERE Equipe = 0 "
-				+ "AND Equipe.NumCandPersonne = Candidat.NumCandidat");
-		try {
-			while(rs.next()){				
-
-				Personne personne = new Personne( inscriptions
-						,rs.getString("NomCandidat")
-						,rs.getString("PrenomPersonne"),rs.getString("MailPersonne")); 
-				personnes.add(personne);
-				 
-			 }
-		} catch (SQLException e) {
-			System.out.println("Erreur de connection à la BDD");
-			e.printStackTrace();
-		}
-		for (Candidat c : getCandidats())
-			if (c instanceof Personne)
-				personnes.add((Personne)c);
-		return Collections.unmodifiableSortedSet(personnes);
+	
+			for (Candidat c : getCandidats())
+				if (c instanceof Personne)
+					personnes.add((Personne)c);
+		
+		return personnes;
 	}
 
 	/**
@@ -120,24 +143,13 @@ public class Inscriptions implements Serializable
 	public SortedSet<Equipe> getEquipes()
 	{
 		SortedSet<Equipe> equipes = new TreeSet<>();
-		ResultSet rs = connect.resultatRequete("SELECT * FROM Candidat WHERE Equipe=1");
-		try {
-			while(rs.next()){				
-
-				Equipe equipe = new Equipe( inscriptions,rs.getString("NomCandidat")); 
-				equipes.add(equipe);
-				 
-			 }
-		} catch (SQLException e) {
-			System.out.println("Erreur de connection à la BDD");
-			e.printStackTrace();
-		}
-		/* 
-		for (Candidat c : getCandidats())
-			if (c instanceof Equipe)
-				equipes.add((Equipe)c);
-		*/
-		return Collections.unmodifiableSortedSet(equipes);
+		
+		
+			for (Candidat c : getCandidats())
+				if (c instanceof Equipe)
+					equipes.add((Equipe)c);
+		
+		return equipes;
 	}
 
 	/**
@@ -152,8 +164,14 @@ public class Inscriptions implements Serializable
 	public Competition createCompetition(String nom,LocalDate dateCloture, boolean enEquipe)
 	{
 		Competition competition = new Competition(this, nom, dateCloture, enEquipe);
-		if (!SERIALIZE)
-			connect.add(competition);
+		if (!SERIALIZE){
+			try {
+				connect.add(competition);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		competitions.add(competition);
 		return competition;
 	}
@@ -171,8 +189,14 @@ public class Inscriptions implements Serializable
 	public Personne createPersonne(String nom, String prenom, String mail)
 	{
 		Personne personne = new Personne(this, nom, prenom, mail);
-		if (!SERIALIZE)
-			connect.add(personne);
+		if (!SERIALIZE){
+			try {
+				connect.add(personne);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		candidats.add(personne);
 		return personne;
 	}
@@ -189,25 +213,32 @@ public class Inscriptions implements Serializable
 	public Equipe createEquipe(String nom)
 	{
 		Equipe equipe = new Equipe(this, nom);
-		if (!SERIALIZE)
-			//TODO ADD EQUIPE CONNECT
-			candidats.add(equipe);
-		else
-			connect.add(equipe);
+		if (!SERIALIZE){
+			try {
+				connect.add(equipe);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}	//TODO ADD EQUIPE CONNECT
+		candidats.add(equipe);
+		
+			
 		return equipe;
 	}
 	
-	void remove(Competition competition)
+	public void remove(Competition competition)
 	{
 		competitions.remove(competition);
-		connect.delCompetition(competition);
+		//connect.delCompetition(competition);
 		//connect.delete(competition);
 	}
 	
 	void remove(Candidat candidat)
 	{
+		
 		candidats.remove(candidat);
-		connect.delCandidat(candidat);
+		//connect.delCandidat(candidat.getIdCandidat());
 	}
 	
 	/**
@@ -318,7 +349,7 @@ public class Inscriptions implements Serializable
 	{
 		LocalDate date = LocalDate.of(2017,Month.APRIL,10);
 		Inscriptions inscriptions = Inscriptions.getInscriptions();
-		SortedSet<Competition> competitions = new TreeSet<Competition>();
+		
 		/*Competition flechettes = inscriptions.createCompetition("Mondial de fléchettes", date, false);
 		Personne tony = inscriptions.createPersonne("Tony", "Dent de plomb", "azerty"), 
 				boris = inscriptions.createPersonne("Boris", "le Hachoir", "ytreza");
@@ -338,7 +369,7 @@ public class Inscriptions implements Serializable
 			System.out.println("Sauvegarde impossible." + e);
 		}
 		*/
-		competitions = inscriptions.getCompetitions();
+	
 	}
 	
 	
