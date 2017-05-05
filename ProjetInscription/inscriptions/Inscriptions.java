@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.ArrayList;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -48,23 +49,38 @@ public class Inscriptions implements Serializable
 		 if(!SERIALIZE){
 			 ResultSet rs = connect.resultatRequete("SELECT * FROM competition");
 			 try {
+				int i = 0;
 				while(rs.next()){
+					System.out.println("getcomp num "+i+"");
+					i++;
 					int num = rs.getInt("NumComp");
 					String nom = rs.getString("NomComp");
 					LocalDate date = rs.getDate("DateCloture").toLocalDate();
 					Boolean enEquipe = rs.getBoolean("EnEquipe");
 					System.out.println("num"+num+"nom "+nom+" date: "+ date+""+enEquipe+"");
-					Competition competition = new Competition( inscriptions,
+					Competition competition = new Competition( getInscriptions(),
 							nom,
 							date, 
 							enEquipe); 
+					competition.setId(num);
 					competitions.add(competition);
 					this.competitions.add(competition);
+
 					 
 				 }
 			} catch (SQLException e) {
-				System.out.println("Erreur de connection à la BDD");
 				e.printStackTrace();
+				
+			}
+			 finally{
+				System.out.println("fermé");
+				 try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 		 }
 		 
@@ -82,12 +98,15 @@ public class Inscriptions implements Serializable
 				+ "FROM Candidat as c, Personne as p "
 				+ "WHERE c.NumCandidat = p.NumCandidatPers");
 		try {
+			int i=0;
 			while(rs.next()){				
-
-				Personne personne = new Personne( inscriptions
+				System.out.println("getcandPers num "+i+"");
+				i++;
+				Personne personne = new Personne( getInscriptions()
 						,rs.getString("NomCandidat")
 						,rs.getString("PrenomPersonne")
 						,rs.getString("MailPers")); 
+				personne.setIdCandidat(rs.getInt("NumCandidat"));				
 				candidats.add(personne);
 				this.candidats.add(personne);
 				 
@@ -95,6 +114,13 @@ public class Inscriptions implements Serializable
 		} catch (SQLException e) {
 			System.out.println("Erreur de connection à la BDD");
 			e.printStackTrace();
+		}finally{
+			try {
+				rs.close();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		
 			ResultSet rs1 = connect.resultatRequete("SELECT * "
@@ -103,16 +129,29 @@ public class Inscriptions implements Serializable
 					+ "(SELECT NumCandidatPers "
 					+ "FROM Personne)");
 			try {
+				int i =0;
 				while(rs1.next()){				
-	
-					Equipe equipe = new Equipe( inscriptions,rs1.getString("NomCandidat")); 
+					System.out.println("getcompEquipe num "+i+"");
+					i++;
+					Equipe equipe = new Equipe( getInscriptions(),rs1.getString("NomCandidat")); 
 					equipe.setIdCandidat(rs1.getInt("NumCandidat"));
 					candidats.add(equipe);
 					this.candidats.add(equipe);
+					
 				 }
 			} catch (SQLException e) {
 				System.out.println("Erreur de connection à la BDD");
 				e.printStackTrace();
+			}
+			 finally{
+				System.out.println("fermé");
+				 try {
+					rs.close();
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 		
 		return Collections.unmodifiableSortedSet(candidats);
@@ -171,6 +210,11 @@ public class Inscriptions implements Serializable
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+			 finally{
+				
+					connect.close();
+				}
+				
 		}
 		competitions.add(competition);
 		return competition;
@@ -190,12 +234,7 @@ public class Inscriptions implements Serializable
 	{
 		Personne personne = new Personne(this, nom, prenom, mail);
 		if (!SERIALIZE){
-			try {
-				connect.add(personne);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			connect.add(personne);
 		}
 		candidats.add(personne);
 		return personne;
@@ -214,12 +253,7 @@ public class Inscriptions implements Serializable
 	{
 		Equipe equipe = new Equipe(this, nom);
 		if (!SERIALIZE){
-			try {
-				connect.add(equipe);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			connect.add(equipe);
 		}	//TODO ADD EQUIPE CONNECT
 		candidats.add(equipe);
 		
@@ -230,15 +264,21 @@ public class Inscriptions implements Serializable
 	public void remove(Competition competition)
 	{
 		competitions.remove(competition);
-		//connect.delCompetition(competition);
-		//connect.delete(competition);
+		
+		connect.delete(competition);
 	}
 	
-	void remove(Candidat candidat)
+	public void remove(Candidat candidat)
 	{
-		
+		for (Candidat candidat2 : candidats) {
+			System.out.println(candidat2.getIdCandidat()+" "+candidat2.getNom());
+		}
+		this.candidats.remove(candidat);
+		for (Candidat candidat2 : candidats) {
+			System.out.println(candidat2.getIdCandidat()+" "+candidat2.getNom());
+		}
 		candidats.remove(candidat);
-		//connect.delCandidat(candidat.getIdCandidat());
+		connect.delete(candidat);
 	}
 	
 	/**
@@ -349,26 +389,10 @@ public class Inscriptions implements Serializable
 	{
 		LocalDate date = LocalDate.of(2017,Month.APRIL,10);
 		Inscriptions inscriptions = Inscriptions.getInscriptions();
-		
-		/*Competition flechettes = inscriptions.createCompetition("Mondial de fléchettes", date, false);
-		Personne tony = inscriptions.createPersonne("Tony", "Dent de plomb", "azerty"), 
-				boris = inscriptions.createPersonne("Boris", "le Hachoir", "ytreza");
-		flechettes.add(tony);
-		Equipe lesManouches = inscriptions.createEquipe("Les Manouches");
-		lesManouches.add(boris);
-		lesManouches.add(tony);
-		System.out.println(inscriptions);
-		lesManouches.delete();
-		System.out.println(inscriptions);
-		try
-		{
-			inscriptions.sauvegarder();
-		} 
-		catch (IOException e)
-		{
-			System.out.println("Sauvegarde impossible." + e);
+		SortedSet<Candidat>candidats = inscriptions.getCandidats();
+		for (Candidat candidat : candidats) {
+			System.out.println(candidat.getIdCandidat()+" "+candidat.getNom());
 		}
-		*/
 	
 	}
 	
@@ -382,4 +406,5 @@ public class Inscriptions implements Serializable
 	{
 		connect.close();
 	}
+
 }

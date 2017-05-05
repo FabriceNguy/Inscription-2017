@@ -17,7 +17,7 @@ public class Personne extends Candidat
 	private static final long serialVersionUID = 4434646724271327254L;
 	private String prenom, mail;
 	private Set<Equipe> equipes;
-	private Connect c;
+	
 	private static final boolean Serializable = false;
 	
 	Personne(Inscriptions inscriptions, String nom, String prenom, String mail)
@@ -45,8 +45,7 @@ public class Personne extends Candidat
 	
 	public void setPrenom(String prenom)
 	{
-		if(!Serializable)
-			c.setPrenomPersonne(prenom,this.getIdCandidat());
+
 		this.prenom = prenom;
 	}
 
@@ -65,8 +64,7 @@ public class Personne extends Candidat
 	
 	public void setMail(String mail)
 	{
-		if(!Serializable)
-			c.setMailPersonne(mail,this.getIdCandidat());
+
 		this.mail = mail;
 	}
 
@@ -78,42 +76,19 @@ public class Personne extends Candidat
 	public Set<Equipe> getEquipes()
 	{
 		
-		ResultSet rs = c.resultatRequete("SELECT * "
-				+ "FROM etre_dans, candidat "
-				+ "WHERE NumCandidatPers ="+getIdCandidat()
-				+ "AND etre_dans.NumCandidatPers = personne.NumCandidat");
-		try {
-			while (rs.next()) {
-				Equipe equipe = new Equipe(getInscriptions(), rs.getString("NomEquipe"));
-				equipes.add(equipe);
-				
-			}
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 		return Collections.unmodifiableSet(equipes);
 	}
 	
 	boolean add(Equipe equipe)
-	{
-		
-		if(!Serializable){
-			try {
-				c.add(equipe);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+	{	
+
 		return equipes.add(equipe);
 	}
 
 	boolean remove(Equipe equipe)
 	{
-		if(!Serializable){
-			c.delMembreEquipe(equipe.getIdCandidat(), getIdCandidat());
-		}
+
 		return equipes.remove(equipe);
 	}
 	

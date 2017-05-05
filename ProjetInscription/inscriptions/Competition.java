@@ -24,10 +24,14 @@ public class Competition implements Comparable<Competition>, Serializable
 	private String nom;
 	private Set<Candidat> candidats;
 	private LocalDate dateCloture;
-	private boolean enEquipe = false;
+	private boolean enEquipe;
 	private int id;
-	private Connect connect;
+
+
 	
+	public void setEnEquipe(boolean enEquipe){
+		this.enEquipe =enEquipe;
+	}
 	
 	Competition(Inscriptions inscriptions, String nom, LocalDate dateCloture, boolean enEquipe)
 	{
@@ -55,8 +59,7 @@ public class Competition implements Comparable<Competition>, Serializable
 	public void setNom(String nom)
 	{
 		this.nom = nom ;
-		if(Serializable)
-			connect.setNameComp(nom,getId());
+
 	}
 	
 	/**
@@ -107,12 +110,9 @@ public class Competition implements Comparable<Competition>, Serializable
 			System.out.println("Erreur ! Il est impossible d'avancer la date de clôture.");
 			dateCloture = dateBefore;
 		}
-		else {
-			if(!Serializable){
-				connect.setDateComp(dateClotureSet, id);
-			}
+
 				
-		}
+		
 	}
 	
 	/**
@@ -122,43 +122,9 @@ public class Competition implements Comparable<Competition>, Serializable
 	
 	public Set<Candidat> getCandidats()
 	{
-		if(!Serializable){
-			ResultSet rs = null;
-			if(enEquipe){
-				rs = connect.resultatRequete("SELECT * "
-						+ "FROM participer, candidat "
-						+ "WHERE participer.NumCandidat = candidat.NumCandidat "
-						+ "AND participer.NumComp ="+getId()+"");
-				try {
-					while(rs.next()){	
-						Equipe equipe = new Equipe(inscriptions, rs.getString("NomCandidat"));
-						candidats.add(equipe);																								
-					}
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			else{
-				rs = connect.resultatRequete("SELECT * "
-						+ "FROM participer, candidat, personne, "
-						+ "WHERE participer.NumCandidat = candidat.NumCandidat "
-						+ "AND participer.NumComp ="+getId()
-						+ " AND personne.NumCandidatPers =  candidat.NumCandidat");
-				try {
-					while(rs.next()){
-						Personne personne = new Personne(inscriptions,
-								rs.getString("NomCandidat"),
-								rs.getString("PrenomPersonne"),
-								rs.getString("MailPers"));
-						candidats.add(personne);
-					}
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}			
-			}	
-		}
+		Connect connect = new Connect();
+		this.candidats = connect.getCandidatsInscrits();
+		connect.close();
 		return Collections.unmodifiableSet(candidats);
 	}
 	
@@ -176,8 +142,7 @@ public class Competition implements Comparable<Competition>, Serializable
 		if (enEquipe || this.inscriptionsOuvertes()==true)
 			throw new RuntimeException();
 		personne.add(this);
-		if(!Serializable)
-			connect.addParticipation(personne.getIdCandidat(), id);
+
 		return candidats.add(personne);
 	}
 
@@ -195,8 +160,7 @@ public class Competition implements Comparable<Competition>, Serializable
 		if (!enEquipe || this.inscriptionsOuvertes()==true)
 			throw new RuntimeException();
 		equipe.add(this);
-		if(!Serializable)
-			connect.addParticipation(equipe.getIdCandidat(), id);
+
 		return candidats.add(equipe);
 	}
 	/**
@@ -208,8 +172,7 @@ public class Competition implements Comparable<Competition>, Serializable
 	public boolean remove(Candidat candidat)
 	{
 		candidat.remove(this);
-		if(!Serializable)
-			connect.delParticipation(candidat.getIdCandidat(), id);
+
 		return candidats.remove(candidat);
 	}
 	
@@ -222,8 +185,7 @@ public class Competition implements Comparable<Competition>, Serializable
 		for (Candidat candidat : candidats)
 			remove(candidat);
 		inscriptions.remove(this);
-		if(!Serializable)
-			connect.delComp(id);
+
 	}
 	
 	@Override

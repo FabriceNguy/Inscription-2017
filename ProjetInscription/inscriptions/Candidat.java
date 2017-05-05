@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 import src.Connect;
@@ -20,9 +21,9 @@ public abstract class Candidat implements Comparable<Candidat>, Serializable
 	private Inscriptions inscriptions;
 	private String nom;
 	private Set<Competition> competitions;
-	private Connect c= new Connect();
+
 	private int idCandidat;
-	private static final boolean Serializable = false;
+
 	
 	Candidat(Inscriptions inscriptions, String nom)
 	{
@@ -49,8 +50,7 @@ public abstract class Candidat implements Comparable<Candidat>, Serializable
 
 	public void setNom(String nom)
 	{
-		if(!Serializable)
-			c.setNameCandidat(nom,idCandidat);
+			
 		this.nom = nom;
 	}
 	
@@ -67,45 +67,23 @@ public abstract class Candidat implements Comparable<Candidat>, Serializable
 
 	public Set<Competition> getCompetitions()
 	{
-		if(!Serializable){
-			ResultSet rs = null;
-			rs = c.resultatRequete("SELECT * "
-					+ "FROM participer, competition "
-					+ "WHERE NumCandidat ="+idCandidat
-					+ " AND participer.NumComp = competition.NumComp");
-			try {
-				while(rs.next()){
-					Competition competition = new Competition(getInscriptions(), 
-							rs.getString("NomComp"), 
-							rs.getDate("DateCloture").toLocalDate(), 
-							rs.getBoolean("EnEquipe"));
-					competitions.add(competition);
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-			
+
+		Connect connect = new Connect(); 
+		this.competitions = connect.getCompetitionsCandidat();
+		connect.close();
 		return Collections.unmodifiableSet(competitions);
 	}
 	
 	boolean add(Competition competition)
 	{
-		if(!Serializable)
-			try {
-				c.add(competition);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+
+
 		return competitions.add(competition);
 	}
 
 	boolean remove(Competition competition)
 	{
-		if(!Serializable)
-			c.delParticipation(idCandidat, competition.getId());
+
 		return competitions.remove(competition);
 	}
 
@@ -115,12 +93,11 @@ public abstract class Candidat implements Comparable<Candidat>, Serializable
 	
 	public void delete()
 	{
-		if(!Serializable)
-			c.delCandidat(getIdCandidat());
+		
 		
 		for (Competition c : competitions)
 			c.remove(this);
-		//getInscriptions().remove(this);
+		getInscriptions().remove(this);
 	}
 	
 	@Override
