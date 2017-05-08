@@ -12,6 +12,7 @@ import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.Month;
@@ -25,22 +26,33 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.mysql.jdbc.CallableStatement;
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 //
 //CTRL + SHIFT + O pour générer les imports
 public class Connect {
 	
 	private Connection conn;
 	private Inscriptions inscriptions;
-    
+    private boolean locale = true;
+	private SortedSet<Personne> membres;
     public Connect() {
-        
+    	String url;
+        String login= "root";
+        String passwd = "nguy";
     	try {
 			Class.forName("com.mysql.jdbc.Driver");
         System.out.println("Driver O.K.");
+        if(locale){
+        	url = "jdbc:mysql://localhost/inscription2017?useSSL=false";
+            login= "root";
+            passwd = "";
+        }
+        else{
+        	url = "jdbc:mysql://192.168.216.131:3306/inscription2017";
+            login= "root";
+            passwd = "nguy";
+        }
 
-        String url = "jdbc:mysql://localhost/inscription2017?useSSL=false";
-        String login= "root";
-        String passwd = "";
 
         conn = DriverManager.getConnection(url, login, passwd);
 		
@@ -61,7 +73,7 @@ public class Connect {
 		}
     }
     
-	 public  void requete(String requete) {
+	 public  void requete(String requete) throws SQLIntegrityConstraintViolationException {
 	 
 		 Statement st =null;
 		 try {
@@ -70,8 +82,8 @@ public class Connect {
 	  
 	      st.executeUpdate(requete);
 	         
-	    } catch (Exception e) {
-	      e.printStackTrace();
+	    } catch (SQLException e) {
+	      throw new SQLIntegrityConstraintViolationException(e);
 	    }
 		 finally{
 			 try {
@@ -91,9 +103,20 @@ public class Connect {
 		  Connection cn = null;
 		  Statement st = null;
 		  ResultSet rs = null;
-		  String url = "jdbc:mysql://localhost/inscription2017?useSSL=false";
-		  String login= "root";
-		  String passwd = "";
+	      String url;
+	      String login;
+		  String passwd ;
+		  if(locale){
+	    	  url = "jdbc:mysql://localhost/inscription2017?useSSL=false";
+	          login= "root";
+	          passwd = "";
+	      }
+	      else {
+	    	  url = "jdbc:mysql://192.168.216.131:3306/inscription2017?useSSL=false";
+	          login= "root";
+	          passwd = "nguy";
+	      }
+
 		  
 		  try {
 	
@@ -125,10 +148,10 @@ public class Connect {
 	 } 
  /*Candidat*/
 
-	 public void setNameCandidat(String prenom,Candidat candidat){
+	 public void setNameCandidat(String prenom,Candidat candidat) throws SQLIntegrityConstraintViolationException{
 	   requete("call SET_NAME_CANDIDAT('"+prenom+"','"+candidat.getIdCandidat()+"')");
 	 }
-	 public void delete(Candidat candidat){
+	 public void delete(Candidat candidat) throws SQLIntegrityConstraintViolationException{
 	   requete("call DEL_CANDIDAT('"+candidat.getIdCandidat()+"')");
 	 }
 
@@ -137,8 +160,8 @@ public class Connect {
  	//Ajout d'une compétition
 	public void add(Competition competition) throws SQLException{
 		ResultSet rs =null;
-	   requete("call ADD_COMP('"+competition.getNom()+"','"+
-			   competition.getDateCloture()+"',"+competition.estEnEquipe()+")");
+		requete("call ADD_COMP('"+competition.getNom()+"','"+
+			competition.getDateCloture()+"',"+competition.estEnEquipe()+")");
 		rs = resultatRequete("Select NumComp FROM Competition");
 		while (rs.next()) {
 			if (rs.last()) {
@@ -147,22 +170,25 @@ public class Connect {
 		}	   	
 	 }
  
-	public void setNameComp(String newName,int id){
+	public void setNameComp(String newName,int id) throws SQLIntegrityConstraintViolationException{
 	   requete("call SET_NAME_COMP('"+newName+"','"+id+"')");
 	}
-	public void setDateComp(LocalDate newDate,int id){
+	public void setDateComp(LocalDate newDate,int id) throws SQLIntegrityConstraintViolationException{
 	   requete("call SET_DATE_COMP('"+newDate+"','"+id+"')");
 	}
+	public void setEnEquipe(boolean EnEquipe,int id) throws SQLIntegrityConstraintViolationException{
+		   requete("UPDATE COMPETITION SET EnEquipe = "+EnEquipe+" WHERE NumComp = "+id+"");
+		}
 	
 	//Supprime une compétition de la BD
-	public void delete(Competition competition) {
-		requete("call DEL_COMP('"+competition.getId()+"'");
+	public void delete(Competition competition) throws SQLIntegrityConstraintViolationException {
+		requete("call DEL_COMP('"+competition.getId()+"')");
 				
 	} 
 	
 /*Personne*/
 	//Ajout d'une compétition
-	public void add(Personne personne){
+	public void add(Personne personne) throws SQLIntegrityConstraintViolationException{
 		 ResultSet rs = null;
 		 requete("call ADD_PERSONNE('"+personne.getNom()+
 				"','"+personne.getMail()+
@@ -182,17 +208,17 @@ public class Connect {
 		}
 	}
  
-	 public void setPrenomPersonne(String prenom,Personne personne){
+	 public void setPrenomPersonne(String prenom,Personne personne) throws SQLIntegrityConstraintViolationException{
 	   requete("call SET_PRENOM_PERSONNE('"+prenom+"','"+personne.getIdCandidat()+"')");
 	 }
-	 public void setMailPersonne(String mail,Personne personne){
+	 public void setMailPersonne(String mail,Personne personne) throws SQLIntegrityConstraintViolationException{
 	   requete("call SET_MAIL_PERSONNE('"+mail+"','"+personne.getIdCandidat()+"')");
 	 }
 
 
  /*Equipe*/
  	//Ajout d'une équipe à la BD
-	public void add(Equipe equipe){
+	public void add(Equipe equipe) throws SQLIntegrityConstraintViolationException{
 		 ResultSet rs = null;
 		 requete("call ADD_EQUIPE('"+equipe.getNom()+"')");
 		 rs = resultatRequete("Select NumCandidat FROM Candidat");
@@ -207,19 +233,45 @@ public class Connect {
 		}  
 	 }
  
-	 public void addMembreEquipe(int idEquipe,int idPersonne){
-	   requete("call ADD_MEMBRE('"+idEquipe+"','"+idPersonne+"')");
-	 }
-	 public void delMembreEquipe(int idEquipe,int idPersonne){
+	 public void addMembreEquipe(int idEquipe,int idPersonne) throws SQLIntegrityConstraintViolationException {
+		 
+		requete("call ADD_MEMBRE('"+idEquipe+"','"+idPersonne+"')");
+		 
+
+	  }
+	 public void delMembreEquipe(int idEquipe,int idPersonne) throws SQLIntegrityConstraintViolationException{
 		   requete("call DEL_MEMBRE('"+idEquipe+"','"+idPersonne+"')");
 	 }
+	 public SortedSet<Personne> getMembresEquipe(Equipe equipe){
+		 inscriptions = new Inscriptions();
+		 SortedSet<Candidat> candidats = inscriptions.getCandidats();
+		 SortedSet<Personne> membres = new TreeSet<Personne>();
+
+		 ResultSet rs =resultatRequete("SELECT * FROM etre_dans,candidat, personne "
+		 		+ "WHERE NumCandidatEquipe = "+equipe.getIdCandidat()+" "
+		 		+ "AND etre_dans.NumCandidatPers = candidat.NumCandidat "
+		 		+ "AND candidat.NumCandidat = personne.NumCandidatPers");
+		 try {
+			while(rs.next()){
+				Personne personne = new Personne(inscriptions, rs.getString("NomCandidat"), rs.getString("PrenomPersonne"), rs.getString("MailPers"));
+				personne.setIdCandidat(rs.getInt("NumCandidatPers"));
+				membres.add(personne);
+			 }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		 
+		 return membres;
+	 }
+	 
 
  /*Participation*/
  
-	 //Recupere les candidats insscrits
-	 public SortedSet<Candidat> getCandidatsInscrits(){
+	 //Recupere les candidats inscrits
+	 public Set<Candidat> getCandidatsInscrits(){
+		 inscriptions = new Inscriptions();
 		 SortedSet<Candidat> candidats = inscriptions.getCandidats();
-		 SortedSet<Candidat> candidatsInscrits = null;
+		 Set<Candidat> candidatsInscrits = new TreeSet<Candidat>();
 		 ArrayList<Integer> ListidCand = new ArrayList<Integer>();
 		 ResultSet rs =resultatRequete("SELECT * FROM participer");
 		 try {
@@ -229,15 +281,16 @@ public class Connect {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		 for (Candidat candidat : candidats) {
+		 for (Iterator<Candidat> iteraror = candidats.iterator(); iteraror.hasNext();) {
+			Candidat candidat = (Candidat) iteraror.next();
 			for (int i = 0 ; i<= ListidCand.size()-1; i++) {
 				if(candidat.getIdCandidat() == ListidCand.get(i))
 					candidatsInscrits.add(candidat);			
 			}
-		}
+		} 
 		 return candidatsInscrits;
 	 }
-	//Recupere les candidats insscrits
+	//Recupere les candidats inscrits
 		 public SortedSet<Competition> getCompetitionsCandidat(){
 			 SortedSet<Competition> competitions = inscriptions.getCompetitions();
 			 SortedSet<Competition> competitionsCandidats = null;
@@ -253,16 +306,17 @@ public class Connect {
 			 for (Competition competition: competitions) {
 				for (int i = 0 ; i<= ListidComp.size()-1; i++) {
 					if(competition.getId() == ListidComp.get(i))
-						competitions.add(competition);			
+						competitionsCandidats.add(competition);	
+					
 				}
 			}
 			 return competitionsCandidats;
 		 }
  
-	 public void addParticipation(int idCand, int idComp){
+	 public void addParticipation(int idCand, int idComp) throws SQLIntegrityConstraintViolationException{
 		   requete("call ADD_PARTICIPATION('"+idCand+"','"+idComp+"')");
 	 }
-	 public void delParticipation(int idCand, int idComp){
+	 public void delParticipation(int idCand, int idComp) throws SQLIntegrityConstraintViolationException{
 		   requete("call DEL_PARTICIPATION('"+idCand+"','"+idComp+"')");
 	}
 

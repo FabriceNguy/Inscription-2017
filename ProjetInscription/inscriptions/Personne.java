@@ -20,7 +20,7 @@ public class Personne extends Candidat
 	
 	private static final boolean Serializable = false;
 	
-	Personne(Inscriptions inscriptions, String nom, String prenom, String mail)
+	public Personne(Inscriptions inscriptions, String nom, String prenom, String mail)
 	{
 		super(inscriptions, nom);
 		this.prenom = prenom;

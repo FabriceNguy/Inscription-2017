@@ -33,10 +33,13 @@ public class Equipe extends Candidat
 	
 	public SortedSet<Personne> getMembres()
 	{
+		SortedSet<Personne> membres = null;
 		
-
+		Connect connect = new Connect();
+		membres = connect.getMembresEquipe(this);
 		
-		return Collections.unmodifiableSortedSet(membres);
+		connect.close();
+		return membres;
 	}
 	
 	/**

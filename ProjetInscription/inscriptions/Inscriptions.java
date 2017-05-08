@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
@@ -84,7 +85,7 @@ public class Inscriptions implements Serializable
 			}
 		 }
 		 
-		return Collections.unmodifiableSortedSet(competitions);
+		return competitions;
 	}
 	
 	/**
@@ -95,7 +96,7 @@ public class Inscriptions implements Serializable
 	public SortedSet<Candidat> getCandidats()
 	{
 		ResultSet rs = connect.resultatRequete("SELECT * "
-				+ "FROM Candidat as c, Personne as p "
+				+ "FROM Candidat as c, personne as p "
 				+ "WHERE c.NumCandidat = p.NumCandidatPers");
 		try {
 			int i=0;
@@ -127,7 +128,7 @@ public class Inscriptions implements Serializable
 					+ "FROM Candidat "
 					+ "WHERE NumCandidat NOT IN "
 					+ "(SELECT NumCandidatPers "
-					+ "FROM Personne)");
+					+ "FROM personne)");
 			try {
 				int i =0;
 				while(rs1.next()){				
@@ -154,7 +155,7 @@ public class Inscriptions implements Serializable
 				
 			}
 		
-		return Collections.unmodifiableSortedSet(candidats);
+		return candidats;
 	}
 
 	/**
@@ -210,10 +211,6 @@ public class Inscriptions implements Serializable
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			 finally{
-				
-					connect.close();
-				}
 				
 		}
 		competitions.add(competition);
@@ -234,7 +231,12 @@ public class Inscriptions implements Serializable
 	{
 		Personne personne = new Personne(this, nom, prenom, mail);
 		if (!SERIALIZE){
-			connect.add(personne);
+			try {
+				connect.add(personne);
+			} catch (SQLIntegrityConstraintViolationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		candidats.add(personne);
 		return personne;
@@ -253,7 +255,12 @@ public class Inscriptions implements Serializable
 	{
 		Equipe equipe = new Equipe(this, nom);
 		if (!SERIALIZE){
-			connect.add(equipe);
+			try {
+				connect.add(equipe);
+			} catch (SQLIntegrityConstraintViolationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}	//TODO ADD EQUIPE CONNECT
 		candidats.add(equipe);
 		
@@ -265,7 +272,12 @@ public class Inscriptions implements Serializable
 	{
 		competitions.remove(competition);
 		
-		connect.delete(competition);
+		try {
+			connect.delete(competition);
+		} catch (SQLIntegrityConstraintViolationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	public void remove(Candidat candidat)
@@ -278,7 +290,12 @@ public class Inscriptions implements Serializable
 			System.out.println(candidat2.getIdCandidat()+" "+candidat2.getNom());
 		}
 		candidats.remove(candidat);
-		connect.delete(candidat);
+		try {
+			connect.delete(candidat);
+		} catch (SQLIntegrityConstraintViolationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/**

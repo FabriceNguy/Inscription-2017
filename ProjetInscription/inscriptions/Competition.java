@@ -122,10 +122,12 @@ public class Competition implements Comparable<Competition>, Serializable
 	
 	public Set<Candidat> getCandidats()
 	{
+		
 		Connect connect = new Connect();
 		this.candidats = connect.getCandidatsInscrits();
 		connect.close();
-		return Collections.unmodifiableSet(candidats);
+		return candidats;
+		
 	}
 	
 	/**
