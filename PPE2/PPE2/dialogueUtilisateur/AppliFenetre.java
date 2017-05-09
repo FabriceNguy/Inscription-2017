@@ -8,6 +8,8 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.List;
 
+import javafx.util.converter.LocalDateStringConverter;
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -30,14 +32,11 @@ import src.Connect;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.image.SampleModel;
 
 import javax.swing.JTabbedPane;
 
 import java.awt.GridLayout;
-
-
-
-
 
 
 
@@ -71,25 +70,30 @@ import javax.swing.JScrollBar;
 
 import org.junit.internal.runners.model.EachTestNotifier;
 
+import com.sun.org.apache.xalan.internal.xsltc.compiler.sym;
+import com.sun.org.apache.xalan.internal.xsltc.compiler.util.CompareGenerator;
 import com.sun.rowset.internal.Row;
+import com.sun.xml.internal.ws.api.message.Message;
 import com.toedter.calendar.JDateChooser;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jgoodies.forms.factories.FormFactory;
 
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
 public class AppliFenetre extends JFrame {
 
 	private JPanel contentPane;
-	private Inscriptions inscriptions;
-	private JTextField textField_1;
 	private JTextField textFieldNomPers;
 	private JTextField textFieldPrenomPers;
 	private JTextField textFieldAdresseMail;
-	private JTextField textField;
-	private Connect connect = new Connect();
-	private JTable table;
-	private JTable table_1;
+	private JTextField textFieldNomComp;
+	private JTable tableEquipes;
+	private JTextField textFieldNomEquipe;
+	private JTable tablePersonnes;
+	private JTable tableCompetitions;
 	
 	
 	/**
@@ -100,7 +104,8 @@ public class AppliFenetre extends JFrame {
 			public void run() {
 				try {
 					AppliFenetre frame = new AppliFenetre();
-					frame.setVisible(true);
+					frame.setVisible(true)
+					;
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -114,271 +119,536 @@ public class AppliFenetre extends JFrame {
 	public AppliFenetre() {
 		
 		final Inscriptions inscriptions = new Inscriptions();
+		final SortedSet<Candidat> candidats = inscriptions.getCandidats();
 		final SortedSet<Competition> competitions = inscriptions.getCompetitions();
 		final SortedSet<Equipe> equipes = inscriptions.getEquipes();
+		final SortedSet<Personne> personnes = inscriptions.getPersonnes();
+		final JDateChooser dateChooser = new JDateChooser();
 		
+		final Choice choiceEnequipe = new Choice();
+		
+		
+		//modele Equipe
+		final DefaultTableModel modelEquipes = new DefaultTableModel(){
+			 /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+		       public boolean isCellEditable(int row, int column) {
+		           return false; //les cellules ne pourront pas être éditées
+		       }
+		};
+		final DefaultTableModel modelPersonnes = new DefaultTableModel(){
+			 /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			@Override
+		       public boolean isCellEditable(int row, int column) {
+		           return false; //les cellules ne pourront pas être éditées
+		       }
+		};
+		final DefaultTableModel modelCompetitions = new DefaultTableModel(){
+			 	/**
+				 * 
+				 */
+				private static final long serialVersionUID = 1L;
+
+				@Override
+			    public boolean isCellEditable(int row, int column){
+			          return false; //les cellules ne pourront pas être éditées
+			     }
+			
+		};
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 1006, 577);
+		setBounds(100, 100, 879, 577);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
+		setTitle("Application Inscription");
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane.setBounds(53, 109, 760, 401);
 		
 		JPanel panel_1 = new JPanel();
 		tabbedPane.addTab("Compétition", null, panel_1, null);
 		
-		JLabel lblAjoutDuneComptition = new JLabel("Ajout d'une comp\u00E9tition");
-		lblAjoutDuneComptition.setBounds(270, 24, 170, 14);
-		
-		textField = new JTextField();
-		textField.setBounds(262, 91, 238, 20);
-		textField.setColumns(10);
+		textFieldNomComp = new JTextField();
+		textFieldNomComp.setBounds(450, 30, 250, 30);
+		textFieldNomComp.setColumns(10);
 		
 		JLabel lblNomComptition = new JLabel("Nom Comp\u00E9tition :");
-		lblNomComptition.setBounds(150, 94, 106, 14);
+		lblNomComptition.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNomComptition.setBounds(450, 0, 250, 30);
 		
 		JLabel lblNewLabel_5 = new JLabel("Date de cl\u00F4ture :");
-		lblNewLabel_5.setBounds(150, 145, 109, 14);
+		lblNewLabel_5.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel_5.setBounds(450, 60, 250, 30);
 		
 		JLabel lblNewLabel_6 = new JLabel("En \u00E9quipe");
-		lblNewLabel_6.setBounds(209, 194, 47, 14);
+		lblNewLabel_6.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel_6.setBounds(450, 120, 250, 30);
+		
+
+		dateChooser.setBounds(450, 90, 250, 30);
+		panel_1.add(dateChooser);
+		
+		
+		choiceEnequipe.setBounds(450, 150, 250, 30);
+		choiceEnequipe.add("Oui");
+		choiceEnequipe.add("Non");
+		panel_1.add(choiceEnequipe);
+		
 		panel_1.setLayout(null);
-		panel_1.add(lblAjoutDuneComptition);
 		panel_1.add(lblNewLabel_5);
 		panel_1.add(lblNomComptition);
-		panel_1.add(textField);
+		panel_1.add(textFieldNomComp);
 		panel_1.add(lblNewLabel_6);
-		
-		JRadioButton rdbtnOui = new JRadioButton("Oui");
-		rdbtnOui.setBounds(283, 194, 74, 14);
-		panel_1.add(rdbtnOui);
-		rdbtnOui.setSelected(true);
-		
-		
-		JRadioButton rdbtnNewRadioButton = new JRadioButton("Non");
-		rdbtnNewRadioButton.setBounds(359, 194, 109, 14);
-		panel_1.add(rdbtnNewRadioButton);
-		rdbtnNewRadioButton.setSelected(false);
 
 		
 		
-		JButton btnNewButton = new JButton("Ajouter");
-		btnNewButton.setBounds(294, 248, 109, 23);
-		panel_1.add(btnNewButton);
-		
-		final Choice choice = new Choice();
-		choice.setBounds(164, 305, 193, 20);
-		for (Competition competition : competitions){
-			
-			choice.add(competition.getNom());
-		
-			
-		}
-		panel_1.add(choice);
-		
-		JButton btnSupprimer = new JButton("Supprimer");
-		btnSupprimer.addActionListener(new ActionListener() {
-			
-
-			private JOptionPane jop1;
-
+		JButton btnAjouterComp = new JButton("Ajouter");
+		btnAjouterComp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				int i=0;
-				for(Competition competition: competitions){
-					if(choice.getSelectedIndex()== i){
-						System.out.println(competition.getNom()+"id"+competition.getId()+" ");
-						inscriptions.remove(competition);
-						choice.remove(competition.getNom());
-						jop1 = new JOptionPane();
-						JOptionPane.showMessageDialog(null, "Compétition supprimée", "Information", JOptionPane.INFORMATION_MESSAGE);
+				boolean existe = false;
+				boolean vide = false;
+				String choix = null;
+				Object[] row = new Object[3];
+				/*
+				LocalDate dateChoisie = LocalDate.parse( dateChooser.getDate());
+				
+				for (Competition competition : competitions) {
+					if(competition.estEnEquipe()){
+						choix = "Oui";
 					}
-					i++;
+					else{
+						choix= "Non";
+					}
+					if (competition.getNom().equals(textFieldNomComp) && competition.getDateCloture().equals(dateChoisie) && choix.equals(choiceEnequipe.getSelectedItem()) ) {
+						existe = true;
+					}
 				}
+				if (textFieldNomComp.getText().isEmpty()){
+					vide = true;
+				}
+				if(!vide && !existe){
+					boolean choixFormulaire;
+					if(choiceEnequipe.getSelectedItem().equals("Oui")){
+						choixFormulaire = true;
+					}
+					else{
+						choixFormulaire = false;
+					}
+					Competition competition = inscriptions.createCompetition(textFieldNomComp.getText(), dateChoisie, choixFormulaire);
+					competitions.add(competition);
+					row[0] = competition.getCandidats();
+					row[1] = competition.getNom();
+					row[2] = competition.getDateCloture();
+					if(competition.estEnEquipe())
+						row[3] = "Oui";
+					else
+						row[3] = "Non";
+					modelEquipes.addRow(row);
+				}
+				else{
+					if(existe)
+						System.out.println("Existe deja !");
+						
+					if(vide)
+						System.out.println("Champs vide !");
+
+				}*/
 			}
 		});
-		btnSupprimer.setBounds(391, 302, 109, 23);
-		panel_1.add(btnSupprimer);
+		btnAjouterComp.setBounds(450, 180, 250, 30);
+		panel_1.add(btnAjouterComp);
+
 		
-		JDateChooser dateChooser = new JDateChooser();
-		dateChooser.setBounds(262, 139, 238, 20);
-		panel_1.add(dateChooser);
+		
+		JButton btnSupprimerComp = new JButton("Supprimer");
+		btnSupprimerComp.setBounds(450, 220, 250, 30);
+		btnSupprimerComp.addActionListener(new ActionListener() {
+			
+
+
+
+			public void actionPerformed(ActionEvent arg0) {
+				
+			}
+		});
+		panel_1.add(btnSupprimerComp);
+		
+		
+		
+		JScrollPane scrollPane_2 = new JScrollPane();
+		scrollPane_2.setBounds(0, 0, 400, 370);
+		panel_1.add(scrollPane_2);
+		
+		//table des compétitions
+		tableCompetitions = new JTable();
+		scrollPane_2.setViewportView(tableCompetitions);
+		tableCompetitions.setAutoCreateRowSorter(true);
+		Object [] columnsCompetitions = {"id","nom","DateCloture","En Equipe"};
+		
+		modelCompetitions.setColumnIdentifiers(columnsCompetitions);
+		
+		for (Competition competition : competitions) {
+			Object[] row = new Object[columnsCompetitions.length];
+			row[0] = competition.getId();
+			row[1] = competition.getNom();
+			row[2] = competition.getDateCloture();
+			if(competition.estEnEquipe()){
+				row[3] = "Oui"; 
+			}
+			else{
+				row[3] = "Non"; 
+			}
+			
+			modelCompetitions.addRow(row);
+		} 
+		tableCompetitions.setModel(modelCompetitions);	
 		
 		JPanel panel = new JPanel();
 		tabbedPane.addTab("Personne", null, panel, null);
 		
 		JButton btnAjouterPersonne = new JButton("Ajouter");
-		btnAjouterPersonne.setBounds(279, 237, 83, 23);
+		btnAjouterPersonne.setBounds(450, 190, 250, 30);
 		btnAjouterPersonne.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				inscriptions.createPersonne(textFieldNomPers.getText(), textFieldNomPers.getText(), textFieldAdresseMail.getText());
+				boolean existe = false;
+				boolean vide = false;
+				for (Personne personne : personnes) {
+					System.out.println(textFieldNomPers.getText()+" "+personne.getNom());
+					if(personne.getNom().equals(textFieldNomPers.getText()) 
+						&& personne.getPrenom().equals(textFieldPrenomPers.getText()) 
+						&& personne.getMail().equals(textFieldAdresseMail.getText())){						
+						existe = true;
+						
+					}
+				}
+				if(textFieldNomEquipe.getText().isEmpty() && textFieldAdresseMail.getText().isEmpty() && textFieldNomPers.getText().isEmpty()){
+					vide = true;
+				}
+				if(!existe && !vide){
+					System.out.println("Existe pas");
+					
+					Personne personne = inscriptions.createPersonne(textFieldNomPers.getText(), textFieldPrenomPers.getText(), textFieldAdresseMail.getText());
+					personnes.add(personne);
+					Object[] row = new Object[4];
+					row[0] = personne.getIdCandidat();
+					row[1] = personne.getNom();
+					row[2] = personne.getPrenom();
+					row[3] = personne.getMail();
+					modelPersonnes.addRow(row);
+					textFieldNomPers.setText(null);
+					textFieldPrenomPers.setText(null);
+					textFieldAdresseMail.setText(null);
+					
+				}
+				else {
+					if(existe){
+						System.out.println("Existe déjà!");
+					}
+					if(vide)
+						System.out.println("Champs vide !");
+						
+				}
 				
 			}
 		});
 		
 		textFieldNomPers = new JTextField();
-		textFieldNomPers.setBounds(224, 85, 260, 20);
+		textFieldNomPers.setBounds(450, 30, 250, 30);
 		textFieldNomPers.setColumns(10);
 		
 		textFieldPrenomPers = new JTextField();
-		textFieldPrenomPers.setBounds(224, 135, 260, 20);
+		textFieldPrenomPers.setBounds(450, 90, 250, 30);
 		textFieldPrenomPers.setColumns(10);
 		
 		textFieldAdresseMail = new JTextField();
-		textFieldAdresseMail.setBounds(224, 193, 260, 20);
+		textFieldAdresseMail.setBounds(450, 150, 250, 30);
 		textFieldAdresseMail.setColumns(10);
 		
 		JLabel lblNewLabel = new JLabel("Nom :");
-		lblNewLabel.setBounds(118, 88, 83, 14);
+		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel.setBounds(450, 0, 250, 30);
 		
 		JLabel lblNewLabel_1 = new JLabel("Prenom :");
-		lblNewLabel_1.setBounds(118, 138, 83, 14);
+		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel_1.setBounds(450, 60, 250, 30);
 		
 		JLabel lblNewLabel_2 = new JLabel("Adresse mail :");
-		lblNewLabel_2.setBounds(118, 196, 83, 14);
-		
-		JLabel lblNewLabel_3 = new JLabel("Ajout d'une personne");
-		lblNewLabel_3.setBounds(266, 29, 172, 14);
+		lblNewLabel_2.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel_2.setBounds(450, 120, 250, 30);
 		panel.setLayout(null);
-		panel.add(lblNewLabel_2);
-		panel.add(lblNewLabel_1);
-		panel.add(textFieldAdresseMail);
+		
+		JScrollPane scrollPane_1 = new JScrollPane();
+		
+
+		scrollPane_1.setBounds(0, 2, 400, 370);
+		
+		
+		
+		//tablePersonnes contient toutes les personnes crées
+		
+		tablePersonnes = new JTable();
+		tablePersonnes.setAutoCreateRowSorter(true);
+		Object [] columnsPersonnes = {"id","nom","prenom","mail"};
+		modelPersonnes.setColumnIdentifiers(columnsPersonnes);
+		
+		for (Personne personne : personnes) {
+			Object[] row = new Object[columnsPersonnes.length];
+			row[0] = personne.getIdCandidat();
+			row[1] = personne.getNom();
+			row[2] = personne.getPrenom();
+			row[3] = personne.getMail();
+			modelPersonnes.addRow(row);
+		} 
+		tablePersonnes.setModel(modelPersonnes);	
+		
+		
+		//Recupere les données de la table et les met dans le formulaire de l'onglet Personne
+		tablePersonnes.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				int i = tablePersonnes.getSelectedRow();
+				textFieldNomPers.setText(modelPersonnes.getValueAt(i, 1).toString());
+				textFieldPrenomPers.setText(modelPersonnes.getValueAt(i, 2).toString());
+				textFieldAdresseMail.setText(modelPersonnes.getValueAt(i, 3).toString());
+			}
+		});
+		scrollPane_1.setViewportView(tablePersonnes);
+		
+		panel.add(scrollPane_1);
 		panel.add(lblNewLabel);
 		panel.add(textFieldNomPers);
+		panel.add(lblNewLabel_1);
 		panel.add(textFieldPrenomPers);
-		panel.add(lblNewLabel_3);
+		panel.add(lblNewLabel_2);
+		panel.add(textFieldAdresseMail);
 		panel.add(btnAjouterPersonne);
 		
+		//Bouton supprimer une personne
+		JButton btnSupprimerPersonne = new JButton("Supprimer");
+		btnSupprimerPersonne.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int ligneSelectionnee = tablePersonnes.getSelectedRow();
+				int colonneId = 0;
+				
+				if(ligneSelectionnee >= 0){
+					System.out.println(tablePersonnes.getValueAt(ligneSelectionnee, colonneId));	
+					for ( Personne personne : personnes) {
+						if(personne.getIdCandidat() == (Integer)tablePersonnes.getValueAt(ligneSelectionnee, colonneId)){
+							System.out.println(personne.getIdCandidat());
+							candidats.remove(personne);
+							equipes.remove(personne);
+							inscriptions.remove(personne);
+						}
+					}
+					textFieldAdresseMail.setText(null);
+					textFieldNomPers.setText(null);
+					textFieldPrenomPers.setText(null);
+					modelPersonnes.removeRow(ligneSelectionnee);
+				}
+			}
+		});
+		btnSupprimerPersonne.setBounds(450, 230, 250, 30);
+		panel.add(btnSupprimerPersonne);
+		
+		JButton btnModifierEquipe = new JButton("Modifier");
+		btnModifierEquipe.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int i = tablePersonnes.getSelectedRow();
+				if( !modelPersonnes.getValueAt(i, 3).equals(textFieldAdresseMail.getText())){
+					for (Personne personne : personnes) {
+						
+							personne.setMail(textFieldAdresseMail.getText());
+							Connect Connect = new Connect();
+							Connect.setMailPersonne(textFieldAdresseMail.getText(), personne);
+							Connect.close();
+							modelPersonnes.setValueAt(textFieldAdresseMail.getText(), i, 3);
+					}
+				}
+				if( !modelPersonnes.getValueAt(i, 2).equals(textFieldPrenomPers.getText())){
+					for (Personne personne : personnes) {
+							personne.setPrenom(textFieldPrenomPers.getText());
+							Connect Connect = new Connect();
+							Connect.setPrenomPersonne(textFieldPrenomPers.getText(), personne);
+							Connect.close();
+							modelPersonnes.setValueAt(textFieldPrenomPers.getText(), i, 2);
+					}
+				}
+				if( !modelPersonnes.getValueAt(i, 1).equals(textFieldNomPers.getText())){
+					for (Personne personne : personnes) {
+						
+							personne.setNom(textFieldNomPers.getText());
+							Connect Connect = new Connect();
+							Connect.setPrenomPersonne(textFieldNomPers.getText(), personne);
+							Connect.close();
+							modelPersonnes.setValueAt(textFieldNomPers.getText(), i, 1);
+							
+					}
+				}
+				
+				
+				
+				
+				
+			}
+		});
+		btnModifierEquipe.setBounds(450, 270, 250, 30);
+		panel.add(btnModifierEquipe);
+		
 		JLabel lblApplicationParking = new JLabel("Application inscription compétition");
+		lblApplicationParking.setHorizontalAlignment(SwingConstants.CENTER);
+		lblApplicationParking.setBounds(331, 46, 194, 38);
+
+		//Tableau Equipes
+		JPanel ongletEquipe = new JPanel();
+		tabbedPane.addTab("Equipe", null, ongletEquipe, null);
+		Object [] columnsEquipes = {"id","nom"};
 		
-		JPanel panel_2 = new JPanel();
-		tabbedPane.addTab("Equipe", null, panel_2, null);
-		
-		textField_1 = new JTextField();
-		textField_1.setBounds(236, 111, 259, 20);
-		textField_1.setColumns(10);
-		
-		JLabel lblNomCandidat = new JLabel("Nom candidat : ");
-		lblNomCandidat.setBounds(127, 114, 105, 14);
-		
-		JButton btnAjouterEquipe = new JButton("Ajouter");
-		btnAjouterEquipe.setBounds(299, 163, 78, 23);
-		btnAjouterEquipe.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				
-				inscriptions.createEquipe(textField_1.getText());
-				
-			}
-		});
-		
-		JLabel lblNewLabel_4 = new JLabel("Ajout d'une Equipe");
-		lblNewLabel_4.setBounds(287, 42, 90, 14);
-		
-		JButton btnNewButton_1 = new JButton("Supprimer");
-		btnNewButton_1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				
-			}
-		});
-		btnNewButton_1.setBounds(371, 249, 89, 23);
-		panel_2.setLayout(null);
-		panel_2.add(lblNewLabel_4);
-		panel_2.add(btnAjouterEquipe);
-		panel_2.add(btnNewButton_1);
-		panel_2.add(lblNomCandidat);
-		panel_2.add(textField_1);
-		
-		Choice choice_1 = new Choice();
-		for (Equipe equipe : equipes) {
-			choice_1.add(equipe.getNom());
-		}
-		choice_1.setBounds(127, 249, 177, 20);
-		panel_2.add(choice_1);
-		
-		JPanel panel_3 = new JPanel();
-		tabbedPane.addTab("New tab", null, panel_3, null);
-		
-		JButton button = new JButton("Ajouter");
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				
-				Ajouter ajouterFenetre = new Ajouter();
-				ajouterFenetre.setVisible(true);
-				
-				
-			}
-		});
-		
-		
-		JButton btnNewButton_2 = new JButton("Supprimer");
-		btnNewButton_2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-			}
-		});
-		
-		JButton button_1 = new JButton("Modifier");
-		
-		JScrollPane scrollPane = new JScrollPane();
-		
-		table_1 = new JTable();
-		Object [] columns = {"id","nom"};
-		DefaultTableModel model = new DefaultTableModel();
-		model.setColumnIdentifiers(columns);
+		modelEquipes.setColumnIdentifiers(columnsEquipes);
 		
 		for(Equipe equipe : equipes) {
 			
-			Object[] row = new Object[2];
+			Object[] row = new Object[columnsEquipes.length];
 			
 			row[0] = equipe.getIdCandidat();
 			row[1] = equipe.getNom();
 				
-			model.addRow(row);
+			modelEquipes.addRow(row);
 		}
-		table_1.setModel(model);
+		contentPane.setLayout(null);
+		ongletEquipe.setLayout(null);
 		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(1, 0, 360, 370);
 		
-		scrollPane.setViewportView(table_1);
-		GroupLayout gl_panel_3 = new GroupLayout(panel_3);
-		gl_panel_3.setHorizontalGroup(
-			gl_panel_3.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_3.createSequentialGroup()
-					.addGap(52)
-					.addGroup(gl_panel_3.createParallelGroup(Alignment.LEADING)
-						.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 338, GroupLayout.PREFERRED_SIZE)
-						.addGroup(gl_panel_3.createSequentialGroup()
-							.addComponent(button, GroupLayout.PREFERRED_SIZE, 131, GroupLayout.PREFERRED_SIZE)
-							.addGap(30)
-							.addComponent(btnNewButton_2, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE)
-							.addGap(30)
-							.addComponent(button_1, GroupLayout.PREFERRED_SIZE, 120, GroupLayout.PREFERRED_SIZE)))
-					.addContainerGap(189, Short.MAX_VALUE))
-		);
-		gl_panel_3.setVerticalGroup(
-			gl_panel_3.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_3.createSequentialGroup()
-					.addGap(36)
-					.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 243, GroupLayout.PREFERRED_SIZE)
-					.addGap(33)
-					.addGroup(gl_panel_3.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panel_3.createParallelGroup(Alignment.BASELINE)
-							.addComponent(btnNewButton_2, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)
-							.addComponent(button, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE))
-						.addComponent(button_1, GroupLayout.PREFERRED_SIZE, 33, GroupLayout.PREFERRED_SIZE)))
-		);
-		panel_3.setLayout(gl_panel_3);
+		tableEquipes = new JTable();
+		tableEquipes.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				int i = tableEquipes.getSelectedRow();
+				textFieldNomEquipe.setText(modelEquipes.getValueAt(i, 1).toString());
+			}
+		});
+		tableEquipes.setModel(modelEquipes);
 		
+		scrollPane.setViewportView(tableEquipes);
+		ongletEquipe.add(scrollPane);
 		
-		contentPane.setLayout(new FormLayout(new ColumnSpec[] {
-				ColumnSpec.decode("48px"),
-				ColumnSpec.decode("100px"),
-				ColumnSpec.decode("149px"),
-				ColumnSpec.decode("428px"),},
-			new RowSpec[] {
-				RowSpec.decode("52px"),
-				RowSpec.decode("38px"),
-				FormFactory.PARAGRAPH_GAP_ROWSPEC,
-				RowSpec.decode("401px"),}));
-		contentPane.add(tabbedPane, "2, 4, 3, 1, fill, fill");
-		contentPane.add(lblApplicationParking, "4, 2, left, fill");
+		//Form Equipe
+		JLabel lblNomEquipe = new JLabel("Nom Equipe :");
+		lblNomEquipe.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNomEquipe.setBounds(450, 0, 250, 30);
+		ongletEquipe.add(lblNomEquipe);
+		
+		textFieldNomEquipe = new JTextField();
+		textFieldNomEquipe.setBounds(450, 30, 250, 30);
+		ongletEquipe.add(textFieldNomEquipe);
+		textFieldNomEquipe.setColumns(10);
+		
+		JLabel label_8 = new JLabel("");
+		label_8.setBounds(1, 93, 251, 93);
+		ongletEquipe.add(label_8);
+		
+		JLabel label_9 = new JLabel("");
+		label_9.setBounds(252, 93, 251, 93);
+		ongletEquipe.add(label_9);
+		
+		//Bouton ajouter une équipe
+		JButton btnAjouterEquipe = new JButton("Ajouter");
+		btnAjouterEquipe.setBounds(450, 70, 250, 30);
+		btnAjouterEquipe.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+				boolean existe = false;
+				boolean vide = false;
+				
+				Object[] row = new Object[2];
+				
+				for (Equipe equipe : equipes) {
+					System.out.println("Equipe"+ equipe.getNom()+ "id"+equipe.getIdCandidat());
+					if (equipe.getNom().equals(textFieldNomEquipe.getText())) {
+						existe = true;
+					}
+				}
+				if (textFieldNomEquipe.getText().isEmpty()){
+					vide = true;
+				}
+				if(!vide && !existe){
+					Equipe equipe = inscriptions.createEquipe(textFieldNomEquipe.getText());
+					equipes.add(equipe);
+					row[0] = equipe.getIdCandidat();
+					row[1] = equipe.getNom();
+						
+					modelEquipes.addRow(row);
+				}
+				else{
+					if(existe)
+						System.out.println("Existe deja !");
+						
+					if(vide)
+						System.out.println("Champs vide !");
+
+				}
+				
+			}
+		});
+		ongletEquipe.add(btnAjouterEquipe);
+		
+		//Bouton supprimer une équipe
+		JButton buttonSupprimerEquipe = new JButton("Supprimer");
+		buttonSupprimerEquipe.setBounds(450, 110, 250, 30);
+		buttonSupprimerEquipe.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				int ligneSelectionnee = tableEquipes.getSelectedRow();
+				int colonneId = 0;
+				
+		
+				if(ligneSelectionnee >= 0){
+					System.out.println(tableEquipes.getValueAt(ligneSelectionnee, colonneId));	
+					for ( Equipe equipe : equipes) {
+						if(equipe.getIdCandidat() == (Integer)tableEquipes.getValueAt(ligneSelectionnee, colonneId)){
+							
+							System.out.println(equipe.getIdCandidat());
+							equipes.remove(equipe);
+							inscriptions.remove(equipe);
+						}
+					}
+					textFieldNomEquipe.setText(null);
+					modelEquipes.removeRow(ligneSelectionnee);
+				}
+			}
+		});
+		ongletEquipe.add(buttonSupprimerEquipe);
+	
+		//Bouton modifier une équipe
+		JButton buttonModifierEquipe = new JButton("Modifier");
+		buttonModifierEquipe.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				
+					int i = tableEquipes.getSelectedRow();
+					if( !modelEquipes.getValueAt(i, 1).equals(textFieldNomEquipe.getText())){
+						for (Equipe equipe : equipes) {
+							
+								equipe.setNom(textFieldNomPers.getText());
+								Connect Connect = new Connect();
+								Connect.setNameCandidat(textFieldNomEquipe.getText(), equipe);
+								Connect.close();
+								modelEquipes.setValueAt(textFieldNomEquipe.getText(), i, 1);
+						}
+					}
+			
+			}
+		});
+		buttonModifierEquipe.setBounds(450, 150, 250, 30);
+		ongletEquipe.add(buttonModifierEquipe);
+		contentPane.add(tabbedPane);
+		contentPane.add(lblApplicationParking);
 	}
 }
