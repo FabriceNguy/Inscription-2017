@@ -124,7 +124,7 @@ public class Competition implements Comparable<Competition>, Serializable
 	{
 		
 		Connect connect = new Connect();
-		this.candidats = connect.getCandidatsInscrits();
+		this.candidats = connect.getCandidatsInscrits(this);
 		connect.close();
 		return candidats;
 		

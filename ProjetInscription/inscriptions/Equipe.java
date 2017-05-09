@@ -20,7 +20,7 @@ public class Equipe extends Candidat
 	private SortedSet<Personne> membres = new TreeSet<>();
 	private static final boolean Serializable = false;
 	
-	Equipe(Inscriptions inscriptions, String nom)
+	public Equipe(Inscriptions inscriptions, String nom)
 	{
 		super(inscriptions, nom);
 	}

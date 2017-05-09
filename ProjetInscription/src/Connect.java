@@ -268,26 +268,43 @@ public class Connect {
  /*Participation*/
  
 	 //Recupere les candidats inscrits
-	 public Set<Candidat> getCandidatsInscrits(){
+	 public SortedSet<Personne> getCandidatsInscrits(Competition competiton ){
 		 inscriptions = new Inscriptions();
-		 SortedSet<Candidat> candidats = inscriptions.getCandidats();
-		 Set<Candidat> candidatsInscrits = new TreeSet<Candidat>();
-		 ArrayList<Integer> ListidCand = new ArrayList<Integer>();
-		 ResultSet rs =resultatRequete("SELECT * FROM participer");
-		 try {
-			while(rs.next()){
-				ListidCand.add( rs.getInt("NumCandidat"));
-			 }
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		 for (Iterator<Candidat> iteraror = candidats.iterator(); iteraror.hasNext();) {
-			Candidat candidat = (Candidat) iteraror.next();
-			for (int i = 0 ; i<= ListidCand.size()-1; i++) {
-				if(candidat.getIdCandidat() == ListidCand.get(i))
-					candidatsInscrits.add(candidat);			
+
+		 SortedSet<Personne> candidatsInscrits = new TreeSet<Personne>();
+		 if(competiton.estEnEquipe()){
+			 ResultSet rs =resultatRequete("SELECT * "
+			 		+ "FROM participer, candidat "
+			 		+ "WHERE participer.NumComp = "+competiton.getId()+" "
+			 		+ "AND participer.NumCandidat = candidat.NumCandidat");
+			 try {
+				while(rs.next()){
+					Personne equipe= new Personne(inscriptions, rs.getString("NomCandidat"),null,null); 
+					equipe.setIdCandidat(rs.getInt("NumCandidat"));
+					candidatsInscrits.add(equipe);
+				 }
+			} catch (SQLException e) {
+				e.printStackTrace();
 			}
-		} 
+		 }
+		 else{
+			 ResultSet rs =resultatRequete("SELECT * "
+				 		+ "FROM participer, candidat, personne "
+				 		+ "WHERE NumComp = "+competiton.getId()+" "
+				 		+ "AND participer.NumCandidat = candidat.NumCandidat "
+				 		+ "AND personne.NumCandidatPers = candidat.NumCandidat");
+				 try {
+					while(rs.next()){
+						Personne personne= new Personne(inscriptions, rs.getString("NomCandidat"), rs.getString("PrenomPersonne"),  rs.getString("MailPers")); 
+						personne.setIdCandidat(rs.getInt("NumCandidat"));
+						candidatsInscrits.add(personne);
+					 }
+				} catch (SQLException e) {
+					e.printStackTrace();
+			}
+		 }
+
+		
 		 return candidatsInscrits;
 	 }
 	//Recupere les candidats inscrits
@@ -319,6 +336,8 @@ public class Connect {
 	 public void delParticipation(int idCand, int idComp) throws SQLIntegrityConstraintViolationException{
 		   requete("call DEL_PARTICIPATION('"+idCand+"','"+idComp+"')");
 	}
-
+	 public void delAllParticipation(int idComp) throws SQLIntegrityConstraintViolationException{
+		   requete("DELETE FROM participer WHERE NumComp ="+idComp+"");
+	}
 	
 }

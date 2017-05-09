@@ -11,21 +11,16 @@ USE inscription2017;
 CREATE TABLE Candidat(
         NumCandidat Int NOT NULL AUTO_INCREMENT,
         NomCandidat Varchar (25) ,
-        Equipe Boolean,
+
+
         PRIMARY KEY (NumCandidat )
 )ENGINE=InnoDB;
-
-
-#------------------------------------------------------------
-# Table: Personne
-#------------------------------------------------------------
-
-CREATE TABLE Personne(
-        PrenomPersonne Varchar (25) ,
-        MailPers       Varchar (25) ,
-        NumCandidatPers    Int NOT NULL ,
-        PRIMARY KEY (NumCandidatPers )
-)ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS `personne` (
+  `PrenomPersonne` varchar(25) DEFAULT NULL,
+  `MailPers` varchar(25) DEFAULT NULL,
+  `NumCandidatPers` int(11) NOT NULL,
+  PRIMARY KEY (`NumCandidatPers`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
 #------------------------------------------------------------
@@ -66,4 +61,4 @@ ALTER TABLE Personne ADD CONSTRAINT FK_Personne_NumCandidat FOREIGN KEY (NumCand
 ALTER TABLE Participer ADD CONSTRAINT FK_Participer_NumCandidat FOREIGN KEY (NumCandidat) REFERENCES Candidat(NumCandidat);
 ALTER TABLE Participer ADD CONSTRAINT FK_Participer_NumComp FOREIGN KEY (NumComp) REFERENCES Competition(NumComp);
 ALTER TABLE ETRE_DANS ADD CONSTRAINT FK_ETRE_DANS_NumCandidat_Equipe FOREIGN KEY (NumCandidatEquipe) REFERENCES Candidat(NumCandidat);
-ALTER TABLE ETRE_DANS ADD CONSTRAINT FK_ETRE_DANS_NumCandidat_Pers FOREIGN KEY (NumCandidatPers) REFERENCES Personne(NumCandidatPers);
+ALTER TABLE ETRE_DANS ADD CONSTRAINT FK_ETRE_DANS_NumCandidat_Pers FOREIGN KEY (NumCandidatPers) REFERENCES Candidat(NumCandidat);
