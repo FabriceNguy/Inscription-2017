@@ -193,7 +193,7 @@ public class CandidatCompetition extends JFrame {
 							Personne personne = (Personne) iterator.next();
 							
 							if(personne.getIdCandidat() == idCandidatSelectionnee){
-								personnes.remove(personne);
+								
 								Connect connect = new Connect();
 								connect.addParticipation(personne.getIdCandidat(), competition.getId());
 								connect.close();
@@ -212,7 +212,7 @@ public class CandidatCompetition extends JFrame {
 							Equipe equipe = (Equipe) iterator.next();
 							
 							if(equipe.getIdCandidat() == idCandidatSelectionnee){
-								equipes.remove(equipe);
+							
 								Connect connect = new Connect();
 								connect.addParticipation(equipe.getIdCandidat(), competition.getId());
 								connect.close();
@@ -241,7 +241,41 @@ public class CandidatCompetition extends JFrame {
 		btnInscrire.setBounds(366, 99, 114, 23);
 		contentPane.add(btnInscrire);
 		
-		JButton btnDesincrire = new JButton("Desincrire");
+		JButton btnDesincrire = new JButton("Désinscrire");
+		btnDesincrire.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try{
+					int i = tableInscrits.getSelectedRow();
+					int idCandidatSelectionnee = (int)tableInscrits.getValueAt(i, 0);
+					
+					for (Iterator<Personne> iterator = personnes.iterator(); iterator
+						.hasNext();) {
+							
+						Personne personne = (Personne) iterator.next();
+							
+						if(personne.getIdCandidat() == idCandidatSelectionnee){
+							
+							Connect connect = new Connect();
+							connect.delParticipation(personne.getIdCandidat(), competition.getId());
+							connect.close();
+							iterator.remove();	 
+							modelInscrits.removeRow(i);
+						}	
+					}
+					
+				}
+				catch  (Exception e){
+					System.out.println(e);
+					if (e instanceof SQLIntegrityConstraintViolationException) {
+						JOptionPane.showMessageDialog(null, "Déjà inscrit");
+				    }
+					if( e instanceof ArrayIndexOutOfBoundsException)
+						JOptionPane.showMessageDialog(null, "Selectionner un candidat à désinscrire ");
+				
+				    
+				}
+			}
+		});
 		btnDesincrire.setBounds(366, 153, 114, 23);
 		contentPane.add(btnDesincrire);
 	}

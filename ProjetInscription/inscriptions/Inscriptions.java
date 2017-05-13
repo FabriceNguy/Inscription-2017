@@ -204,7 +204,7 @@ public class Inscriptions implements Serializable
 	public Competition createCompetition(String nom,LocalDate dateCloture, boolean enEquipe)
 	{
 		Competition competition = new Competition(this, nom, dateCloture, enEquipe);
-		if (!SERIALIZE){
+		if (!SERIALIZE && !competitions.contains(competition)){
 			try {
 				connect.add(competition);
 			} catch (SQLException e) {
@@ -230,7 +230,7 @@ public class Inscriptions implements Serializable
 	public Personne createPersonne(String nom, String prenom, String mail)
 	{
 		Personne personne = new Personne(this, nom, prenom, mail);
-		if (!SERIALIZE){
+		if (!SERIALIZE && !candidats.contains(personne)){
 			try {
 				connect.add(personne);
 			} catch (SQLIntegrityConstraintViolationException e) {
@@ -253,16 +253,20 @@ public class Inscriptions implements Serializable
 	
 	public Equipe createEquipe(String nom)
 	{
+		boolean existe = false;
 		Equipe equipe = new Equipe(this, nom);
-		if (!SERIALIZE){
+		if(candidats.contains(equipe))
+			existe = true;
+		if (!SERIALIZE && !existe){
 			try {
 				connect.add(equipe);
+				candidats.add(equipe);
 			} catch (SQLIntegrityConstraintViolationException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}	//TODO ADD EQUIPE CONNECT
-		candidats.add(equipe);
+		
 		
 			
 		return equipe;

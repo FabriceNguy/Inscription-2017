@@ -48,7 +48,7 @@ public class Connect {
             passwd = "";
         }
         else{
-        	url = "jdbc:mysql://192.168.216.131:3306/inscription2017";
+        	url = "jdbc:mysql://192.168.216.132:3306/inscription2017";
             login= "root";
             passwd = "nguy";
         }
@@ -112,7 +112,7 @@ public class Connect {
 	          passwd = "";
 	      }
 	      else {
-	    	  url = "jdbc:mysql://192.168.216.131:3306/inscription2017?useSSL=false";
+	    	  url = "jdbc:mysql://192.168.216.132:3306/inscription2017?useSSL=false";
 	          login= "root";
 	          passwd = "nguy";
 	      }

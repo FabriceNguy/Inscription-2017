@@ -33,7 +33,7 @@ public class Competition implements Comparable<Competition>, Serializable
 		this.enEquipe =enEquipe;
 	}
 	
-	Competition(Inscriptions inscriptions, String nom, LocalDate dateCloture, boolean enEquipe)
+	public Competition(Inscriptions inscriptions, String nom, LocalDate dateCloture, boolean enEquipe)
 	{
 		this.enEquipe = enEquipe;
 		this.inscriptions = inscriptions;

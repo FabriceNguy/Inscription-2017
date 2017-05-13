@@ -30,6 +30,7 @@ import javax.swing.SwingConstants;
 import javax.swing.JButton;
 
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
+import com.sun.media.jfxmedia.track.Track;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -178,7 +179,8 @@ public class MembreEquipe extends JFrame {
 							Personne personne = (Personne) iterator.next();
 							
 							if(personne.getIdCandidat() == idPersonneSelectionnee){
-								equipe.add(personne);
+								
+								membres.add(personne);
 								Connect connect = new Connect();
 								try{
 									connect.addMembreEquipe(equipe.getIdCandidat(), personne.getIdCandidat());
@@ -225,16 +227,14 @@ public class MembreEquipe extends JFrame {
 							Personne membre = (Personne) iterator.next();
 							
 							if(membre.getIdCandidat() == idMembreSelectionnee){
-								equipe.remove(membre);
+								
 								Connect connect = new Connect();
 								connect.delMembreEquipe(equipe.getIdCandidat(), membre.getIdCandidat());
 								connect.close();
-								Object[] row = new Object[4];
-								row[0] = membre.getIdCandidat();
-								row[1] = membre.getNom();
-								row[2] = membre.getPrenom();
-								row[3] = membre.getMail();
+
 								modelMembres.removeRow(i);
+								iterator.remove();
+								//membres.remove(membre);
 								 
 								
 							}	
@@ -242,6 +242,8 @@ public class MembreEquipe extends JFrame {
 	
 					}
 				}catch (Exception e) {
+					
+					e.printStackTrace();
 					JOptionPane.showMessageDialog(null, "Selectionner une personne");
 				}
 					

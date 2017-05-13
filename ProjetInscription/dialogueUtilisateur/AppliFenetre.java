@@ -112,7 +112,7 @@ public class AppliFenetre extends JFrame {
 		final String non = "Non";
 		final String messageChampsVides ="Champs Vides";
 		final String messageExiste = "Exite déjà";
-		
+		final String messageNonModifie = "Rien n'a été modifié";
 		//modele Equipe
 		final DefaultTableModel modelEquipes = new DefaultTableModel(){
 			 /**
@@ -200,28 +200,23 @@ public class AppliFenetre extends JFrame {
 		JButton btnAjouterComp = new JButton("Ajouter");
 		btnAjouterComp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				boolean existe = false;
+
 				boolean vide = false;
-				boolean dateDepassee = false;
+
 
 				try{
 					Object[] row = new Object[4];
-					LocalDate aujourdhui = LocalDate.now();
+
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 					String date = sdf.format(dateChooser.getDate());
 					DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 					LocalDate dateChoisie = LocalDate.parse(date, DATE_FORMAT);
-					if(dateChoisie.isBefore(aujourdhui))
-						dateDepassee =true; 
-					for (Competition competition : competitions) {
-						if (competition.getNom().equals(textFieldNomComp.getText()) ) {
-							existe = true;
-						}
-					}
+
+
 					if (textFieldNomComp.getText().isEmpty()){
 						vide = true;
 					}
-					if(!vide && !existe && !dateDepassee){
+					if(!vide ){
 						boolean choixFormulaire;
 						if(choiceEnequipe.getSelectedItem().equals("Oui")){
 							choixFormulaire = true;
@@ -230,26 +225,24 @@ public class AppliFenetre extends JFrame {
 							choixFormulaire = false;
 						}
 						Competition competition = inscriptions.createCompetition(textFieldNomComp.getText(), dateChoisie, choixFormulaire);
-						competitions.add(competition);
 						
-						row[0] = competition.getId();
-						row[1] = competition.getNom();
-						row[2] = competition.getDateCloture();
-						if(competition.estEnEquipe())
-							row[3] = oui;
-						else
-							row[3] = non;
-						modelCompetitions.addRow(row);
+						if(!competitions.contains(competition)){
+							competitions.add(competition);
+							row[0] = competition.getId();
+							row[1] = competition.getNom();
+							row[2] = competition.getDateCloture();
+							if(competition.estEnEquipe())
+								row[3] = oui;
+							else
+								row[3] = non;
+							modelCompetitions.addRow(row);
+						}
+						else{
+							JOptionPane.showMessageDialog(null, messageExiste);
+						}
 					}
-					else{
-						if(existe)
-							System.out.println(messageExiste);
-						JOptionPane.showMessageDialog(null, messageExiste);
-						if(vide)
-							System.out.println(messageChampsVides);
-						if(dateDepassee)
-							System.out.println("Date incorrecte");
-	
+					else{											
+						System.out.println(messageChampsVides);			
 					}
 				}
 				catch (Exception e){
@@ -338,66 +331,72 @@ public class AppliFenetre extends JFrame {
 		btnModifierComp.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try{
+					boolean vide = false;
+					boolean existe = false;
+					boolean EnEquipe ;
 					int i = tableCompetitions.getSelectedRow();
 					
-					if( !modelCompetitions .getValueAt(i, 1).equals(textFieldNomComp.getText()) && !textFieldNomComp.getText().trim().isEmpty()){
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+					String date = sdf.format(dateChooser.getDate());
+					DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+					LocalDate dateChoisie = LocalDate.parse(date, DATE_FORMAT);
+					if(choiceEnequipe.getSelectedItem() == oui){
+						System.out.println("oui");
+						EnEquipe = true;
+					}
+					else{
+						EnEquipe = false;
+					}
+					Competition competition = new Competition(inscriptions, textFieldNomComp.getText(), dateChoisie, EnEquipe);
+					if(competitions.contains(competition)){
+						existe =true;
+						
+					}
+					if(textFieldNomComp.getText().trim().isEmpty()){
+						vide = true; 
+						JOptionPane.showMessageDialog(null, messageChampsVides);
+					}
+					if(!vide && !existe){
 						
 						for (Iterator<Competition> iterator = competitions.iterator(); iterator
 								.hasNext();) {
-							Competition competition = (Competition) iterator.next();
-							if(competition.getId() == (int)modelCompetitions.getValueAt(i, 0)){
-								competition.setNom(textFieldNomComp.getText());
+							Competition competitionModif = (Competition) iterator.next();
+							if(competitionModif.getId() == (int)modelCompetitions.getValueAt(i, 0)){
+								competitionModif.setNom(textFieldNomComp.getText());
 								Connect connect = new Connect();
-								connect.setNameComp(textFieldNomComp.getText(), competition.getId()); 
+								connect.setNameComp(textFieldNomComp.getText(), competitionModif.getId()); 
+								
+								competitionModif.setEnEquipe(EnEquipe);
+								connect.setEnEquipe(EnEquipe, competition.getId());
+								
+								competitionModif.setDateCloture(dateChoisie);
+						
+								connect.setDateComp(dateChoisie, competitionModif.getId()); 
 								connect.close();
 								modelCompetitions.setValueAt(textFieldNomComp.getText(), i, 1);
+
 							}
 						}
 					}
-					
-					if( !modelCompetitions .getValueAt(i, 2).equals(dateChooser.getDateFormatString())){
-						for (Iterator<Competition> iterator = competitions.iterator(); iterator
-								.hasNext();) {
-							Competition competition = (Competition) iterator.next();
-							if(competition.getId() == (int)modelCompetitions.getValueAt(i, 0)){
-								SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-								String date = sdf.format(dateChooser.getDate());
-								DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-								LocalDate dateChoisie = LocalDate.parse(date, DATE_FORMAT);
-								competition.setDateCloture(dateChoisie);
-								Connect connect = new Connect();
-								connect.setDateComp(dateChoisie, competition.getId()); 
-								
-								connect.close();
-								modelCompetitions.setValueAt(competition.getDateCloture(), i, 2);
-							}
-						}
-					}
-					if( choiceEnequipe.getSelectedItem() != modelCompetitions.getValueAt(i, 3)){
-						for (Iterator<Competition> iterator = competitions.iterator(); iterator
-								.hasNext();) {
-							Competition competition = (Competition) iterator.next();
-							if(competition.getId() == (int)modelCompetitions.getValueAt(i, 0)){
-								if(choiceEnequipe.getSelectedItem() == oui){	
-									competition.setEnEquipe(true);
-									Connect connect = new Connect();
-									connect.setEnEquipe(true, competition.getId());
-									connect.delAllParticipation(competition.getId());
-									connect.close();
-									modelCompetitions.setValueAt(oui, i, 3);
-								}
-								else{
-									competition.setEnEquipe(false);
-									Connect connect = new Connect();
-									connect.setEnEquipe(false, competition.getId());
-									connect.delAllParticipation(competition.getId());
-									modelCompetitions.setValueAt(non, i, 3);
-								}
-	
-							}	
+					for (Iterator<Competition> iterator = competitions.iterator(); iterator
+							.hasNext();) {
+						Competition competitionModif = (Competition) iterator.next();
+						if(competitionModif.getId() == (int)modelCompetitions.getValueAt(i, 0)){
+
+							Connect connect = new Connect();
+							competitionModif.setEnEquipe(EnEquipe);
 							
+							connect.setEnEquipe(EnEquipe, competition.getId());
+							competition.setEnEquipe(EnEquipe);
+							competitionModif.setDateCloture(dateChoisie);
+					
+							connect.setDateComp(dateChoisie, competitionModif.getId()); 
+							connect.close();
+							modelCompetitions.setValueAt(choiceEnequipe.getSelectedItem(), i, 3);
+							modelCompetitions.setValueAt(dateChoisie, i, 2);
 						}
 					}
+										
 				}
 				catch (Exception e) {
 					System.out.println(e);
@@ -477,56 +476,40 @@ public class AppliFenetre extends JFrame {
 		btnAjouterPersonne.setBounds(450, 190, 250, 30);
 		btnAjouterPersonne.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				boolean existe = false;
-				boolean vide = false;
-				for (Iterator<Personne> iterator = personnes.iterator(); iterator
-						.hasNext();) {
-					Personne personne = (Personne) iterator.next();
-					System.out.println(textFieldNomPers.getText()+" "+personne.getNom());
-					if(personne.getNom().equals(textFieldNomPers.getText()) 
-						&& personne.getPrenom().equals(textFieldPrenomPers.getText()) 
-						&& personne.getMail().equals(textFieldAdresseMail.getText())){						
-						existe = true;
-						
-					}
-				}
 
-				if(textFieldPrenomPers.getText().trim().isEmpty()){
+				boolean vide = false;
+
+				if(textFieldPrenomPers.getText().trim().isEmpty() 
+						|| textFieldAdresseMail.getText().trim().isEmpty()
+						|| textFieldNomPers.getText().trim().isEmpty()){
 					vide = true;
-				}
-				if(textFieldAdresseMail.getText().trim().isEmpty()){
-					vide = true;
-				}
-				if(textFieldNomPers.getText().trim().isEmpty()){
-					vide = true;
+					JOptionPane.showMessageDialog(null, messageChampsVides);
 				}
 		
-				if(!existe && !vide){										
-					Personne personne = inscriptions.createPersonne(textFieldNomPers.getText(), textFieldPrenomPers.getText(), textFieldAdresseMail.getText());
-					personnes.add(personne);
-					
-					Object[] row = new Object[4];
-					row[0] = personne.getIdCandidat();
-					row[1] = personne.getNom();
-					row[2] = personne.getPrenom();
-					row[3] = personne.getMail();
-					modelPersonnes.addRow(row);
-					textFieldNomPers.setText(null);
-					textFieldPrenomPers.setText(null);
-					textFieldAdresseMail.setText(null);
+				if(!vide){										
+					Personne personne = inscriptions.createPersonne(textFieldNomPers.getText(), 
+							textFieldPrenomPers.getText(), 
+							textFieldAdresseMail.getText());
+					if(!personnes.contains(personne)){
+						personnes.add(personne);	
+						Object[] row = new Object[4];
+						row[0] = personne.getIdCandidat();
+						row[1] = personne.getNom();
+						row[2] = personne.getPrenom();
+						row[3] = personne.getMail();
+						modelPersonnes.addRow(row);
+						textFieldNomPers.setText(null);
+						textFieldPrenomPers.setText(null);
+						textFieldAdresseMail.setText(null);
+					}
+					else{
+						
+						JOptionPane.showMessageDialog(null, messageExiste);
+						
+					}
 					
 				}
-				else {
-					if(existe){
-						System.out.println(messageExiste);
-					}
-					if(vide){
-						System.out.println(textFieldNomEquipe.getText().isEmpty()+
-						"" +textFieldPrenomPers.getText() 
-						+""+textFieldAdresseMail.getText());
-						System.out.println(messageChampsVides);
-					}
-				}
+
 				
 			}
 		});
@@ -640,47 +623,47 @@ public class AppliFenetre extends JFrame {
 		btnModifierPersonne.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				try{
+					boolean vide = false;
+					boolean existe = false;
+					
 					int i = tablePersonnes.getSelectedRow();
-					if( !modelPersonnes.getValueAt(i, 3).equals(textFieldAdresseMail.getText()) && !textFieldAdresseMail.getText().trim().isEmpty()){
+					
+					Personne personne = new Personne(inscriptions, textFieldNomPers.getText(), 
+							textFieldPrenomPers.getText(), 
+							textFieldAdresseMail.getText());
+					if(textFieldAdresseMail.getText().trim().isEmpty() 
+							|| textFieldPrenomPers.getText().trim().isEmpty() 
+							|| textFieldNomPers.getText().trim().isEmpty()){
+						vide = true;
+						JOptionPane.showMessageDialog(null, messageChampsVides);
+					}
+
+					if(personnes.contains(personne)){
+						existe = true;
+						JOptionPane.showMessageDialog(null, messageExiste);
+					}
+					if(!vide && ! existe){
+						
+						
 						for (Iterator<Personne> iterator = personnes.iterator(); iterator
 								.hasNext();) {
-							Personne personne = (Personne) iterator.next();
-							if(personne.getIdCandidat() == (int)modelPersonnes.getValueAt(i, 0)){
-								personne.setMail(textFieldAdresseMail.getText());
+							Personne personneModif = (Personne) iterator.next();
+							if(personneModif.getIdCandidat() == (int)modelPersonnes.getValueAt(i, 0)){
+								
+								personneModif.setMail(textFieldAdresseMail.getText());
 								Connect Connect = new Connect();
-								Connect.setMailPersonne(textFieldAdresseMail.getText(), personne);
+								Connect.setMailPersonne(textFieldAdresseMail.getText(), personneModif);
+								Connect.setPrenomPersonne(textFieldPrenomPers.getText(), personneModif);
+								Connect.setNameCandidat(textFieldNomPers.getText(), personneModif);
 								Connect.close();
 								modelPersonnes.setValueAt(textFieldAdresseMail.getText(), i, 3);
-							}
-						}
-					}
-					if( !modelPersonnes.getValueAt(i, 2).equals(textFieldPrenomPers.getText()) && !textFieldPrenomPers.getText().trim().isEmpty()){
-						for (Iterator<Personne> iterator = personnes.iterator(); iterator
-								.hasNext();) {
-							Personne personne = (Personne) iterator.next();
-							if(personne.getIdCandidat() == (int) modelPersonnes.getValueAt(i, 0)){
-								personne.setPrenom(textFieldPrenomPers.getText());
-								Connect Connect = new Connect();
-								Connect.setPrenomPersonne(textFieldPrenomPers.getText(), personne);
-								Connect.close();
 								modelPersonnes.setValueAt(textFieldPrenomPers.getText(), i, 2);
+								modelPersonnes.setValueAt(textFieldNomPers.getText(), i, 1);
 							}
 						}
 					}
-					if( !modelPersonnes.getValueAt(i, 1).equals(textFieldNomPers.getText()) && !textFieldNomPers.getText().trim().isEmpty()){
-						for (Iterator<Personne> iterator = personnes.iterator(); iterator
-								.hasNext();) {
-							Personne personne = (Personne) iterator.next();
-							if(personne.getIdCandidat() == (int)modelPersonnes.getValueAt(i, 0)){
-								personne.setNom(textFieldNomPers.getText());
-								
-								Connect Connect = new Connect();
-								Connect.setPrenomPersonne(textFieldNomPers.getText(), personne);
-								Connect.close();
-								modelPersonnes.setValueAt(textFieldNomPers.getText(), i, 1);
-							}	
-						}
-					}
+					
+					
 				}
 				catch (Exception e) {
 					JOptionPane.showMessageDialog(null, "Selectionner une personne");
@@ -694,6 +677,10 @@ public class AppliFenetre extends JFrame {
 		});
 		btnModifierPersonne.setBounds(450, 270, 250, 30);
 		panel.add(btnModifierPersonne);
+		
+		JButton btnPersonneEquipes = new JButton("Equipes");
+		btnPersonneEquipes.setBounds(450, 310, 250, 30);
+		panel.add(btnPersonneEquipes);
 		
 		JLabel lblApplicationParking = new JLabel("Application Inscription");
 		lblApplicationParking.setFont(new Font("Tahoma", Font.PLAIN, 19));
@@ -760,40 +747,31 @@ public class AppliFenetre extends JFrame {
 		btnAjouterEquipe.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				
-				boolean existe = false;
+
 				boolean vide = false;
 				
 				Object[] row = new Object[2];
 				
-				for (Iterator<Equipe> iterator = equipes.iterator(); iterator
-						.hasNext();) {
-					Equipe equipe = (Equipe) iterator.next();
-					System.out.println("Equipe"+ equipe.getNom()+ "id"+equipe.getIdCandidat());
-					if (equipe.getNom().equals(textFieldNomEquipe.getText())) {
-						existe = true;
-					}
-				}
 				if (textFieldNomEquipe.getText().trim().isEmpty()){
 					vide = true;
+					JOptionPane.showMessageDialog(null, messageChampsVides);
 				}
-				if(!vide && !existe){
+				
+				if(!vide){
 					Equipe equipe = inscriptions.createEquipe(textFieldNomEquipe.getText());
-					equipes.add(equipe);
-					row[0] = equipe.getIdCandidat();
-					row[1] = equipe.getNom();
-					textFieldNomEquipe.setText(null);	
-					modelEquipes.addRow(row);
-				}
-				else{
-					if(existe){
-						System.out.println("Existe deja !");
-						JOptionPane.showMessageDialog(null, messageExiste);
-					}	
+					if(!equipes.contains(equipe)){
+						equipes.add(equipe);
+						row[0] = equipe.getIdCandidat();
+						row[1] = equipe.getNom();
+						textFieldNomEquipe.setText(null);	
+						modelEquipes.addRow(row);
+					}
 					else{
-						System.out.println("Champs vide !");
-						JOptionPane.showMessageDialog(null, messageChampsVides);
+						JOptionPane.showMessageDialog(null, messageExiste);
 					}
 				}
+
+
 				
 			}
 		});
@@ -837,16 +815,29 @@ public class AppliFenetre extends JFrame {
 		buttonModifierEquipe.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 					try{
+						boolean vide = false;
+						boolean existe = false;
 						int i = tableEquipes.getSelectedRow();
-						if( !modelEquipes.getValueAt(i, 1).equals(textFieldNomEquipe.getText()) && !textFieldNomEquipe.getText().trim().isEmpty()){
+						
+						Equipe equipe = new Equipe(inscriptions, textFieldNomEquipe.getText());
+						
+						if(equipes.contains(equipe)){
+							existe =true;
+							JOptionPane.showMessageDialog(null, messageNonModifie);
+						}
+						if(textFieldNomEquipe.getText().trim().isEmpty()){
+							vide = true;
+							JOptionPane.showMessageDialog(null, messageChampsVides);
+						}
+						if( !vide && !existe){
 							for (Iterator<Equipe> iterator = equipes.iterator(); iterator
 									.hasNext();) {
 								
-								Equipe equipe = (Equipe) iterator.next();																				
-								if(equipe.getIdCandidat() == (int)modelEquipes.getValueAt(i, 0)){
-									equipe.setNom(textFieldNomPers.getText());
+								Equipe equipeModif = (Equipe) iterator.next();																				
+								if(equipeModif.getIdCandidat() == (int)modelEquipes.getValueAt(i, 0)){
+									equipeModif.setNom(textFieldNomPers.getText());
 									Connect Connect = new Connect();
-									Connect.setNameCandidat(textFieldNomEquipe.getText(), equipe);
+									Connect.setNameCandidat(textFieldNomEquipe.getText(), equipeModif);
 									Connect.close();
 									modelEquipes.setValueAt(textFieldNomEquipe.getText(), i, 1);
 								
@@ -863,7 +854,7 @@ public class AppliFenetre extends JFrame {
 		buttonModifierEquipe.setBounds(450, 150, 250, 30);
 		ongletEquipe.add(buttonModifierEquipe);
 		//Membre Equipe
-		JButton btnMembreEquipe = new JButton("Membre");
+		JButton btnMembreEquipe = new JButton("Membres");
 		btnMembreEquipe.addActionListener(new ActionListener() {
 			private Equipe equipeSelectionnee;
 

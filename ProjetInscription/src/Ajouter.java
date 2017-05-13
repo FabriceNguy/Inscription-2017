@@ -18,6 +18,8 @@ import com.sun.xml.internal.ws.api.message.Message;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.swing.JTable;
 
@@ -39,7 +41,18 @@ public class Ajouter extends JFrame {
 					e.printStackTrace();
 				}
 			}
+
 		});
+		Inscriptions inscriptions = new Inscriptions();
+		SortedSet<Equipe> equipes = new TreeSet<>();
+		Equipe equipe = new Equipe(inscriptions, "Test", 0);
+		Equipe equipe2 = new Equipe(inscriptions, "Test", 1);
+		Equipe equipe3 = new Equipe(inscriptions, "Test0", 1);
+		equipes.add(equipe);
+		equipes.add(equipe2);
+		equipes.add(equipe3);
+		
+		System.out.println(equipes.size());
 	}
 
 	/**
