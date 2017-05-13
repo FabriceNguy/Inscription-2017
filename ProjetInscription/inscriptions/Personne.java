@@ -1,10 +1,8 @@
 package inscriptions;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collections;
+
 import java.util.Set;
-import java.util.TreeSet;
+
 
 import src.Connect;
 
@@ -17,15 +15,13 @@ public class Personne extends Candidat
 	private static final long serialVersionUID = 4434646724271327254L;
 	private String prenom, mail;
 	private Set<Equipe> equipes;
-	
-	private static final boolean Serializable = false;
-	
+
 	public Personne(Inscriptions inscriptions, String nom, String prenom, String mail)
 	{
 		super(inscriptions, nom);
 		this.prenom = prenom;
 		this.mail = mail;
-		equipes = new TreeSet<>();
+		
 	}
 
 	/**
@@ -76,8 +72,13 @@ public class Personne extends Candidat
 	public Set<Equipe> getEquipes()
 	{
 		
-
-		return Collections.unmodifiableSet(equipes);
+		Set<Equipe> equipes = null;
+		
+		Connect connect = new Connect();
+		equipes = connect.getEquipesCandidats(this);
+		
+		connect.close();
+		return equipes;
 	}
 	
 	boolean add(Equipe equipe)

@@ -1,16 +1,14 @@
 package dialogueUtilisateur;
 
-import inscriptions.Candidat;
+
 import inscriptions.Equipe;
 import inscriptions.Inscriptions;
 import inscriptions.Personne;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-import java.awt.Frame;
+
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.ArrayList;
+
 import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedSet;
@@ -29,51 +27,24 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.JButton;
 
-import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
-import com.sun.media.jfxmedia.track.Track;
-
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 public class MembreEquipe extends JFrame {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private JPanel contentPane;
-	private JTable table;
-	private JTable table_1;
 	private JTable table_2;
 	private JTable table_3;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		/*final Inscriptions inscriptions = new Inscriptions();
-		
-		final Equipe equipe = inscriptions.createEquipe("Test");
-		Connect connect = new Connect();
-		
-		Personne membre = inscriptions.createPersonne("PersonneTest", "PrenomTest", "mail@test.com");
-		equipe.add(membre);
-		connect.addMembreEquipe(equipe.getIdCandidat(), membre.getIdCandidat());
-		connect.close();
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				
-				try {
-					MembreEquipe frame = new MembreEquipe(equipe, inscriptions);
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-		*/
-	}
 
 	/**
 	 * Create the frame.
 	 */
 	public MembreEquipe(final Equipe equipe, Inscriptions inscription) {
+		setTitle("Membres");
 		final DefaultTableModel modelMembres= new DefaultTableModel(){
 			 /**
 			 * 
@@ -106,7 +77,7 @@ public class MembreEquipe extends JFrame {
 		contentPane.setLayout(null);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(10, 52, 350, 430);
+		scrollPane.setBounds(25, 60, 350, 440);
 		contentPane.add(scrollPane);
 		
 		table_2 = new JTable();
@@ -116,14 +87,14 @@ public class MembreEquipe extends JFrame {
 		scrollPane.setViewportView(table_2);
 		
 		JLabel lblMembres = new JLabel("Membres");
-		lblMembres.setBounds(110, 27, 123, 14);
+		lblMembres.setBounds(137, 30, 125, 20);
 		lblMembres.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(lblMembres);
 		Object [] columnsCandidatPers = {"id","nom","prenom","mail"};
 		modelCandidatPers.setColumnIdentifiers(columnsCandidatPers);
 		
 		JScrollPane scrollPane_1 = new JScrollPane();
-		scrollPane_1.setBounds(560, 52, 298, 430);
+		scrollPane_1.setBounds(525, 60, 350, 440);
 		contentPane.add(scrollPane_1);
 		
 		table_3 = new JTable();
@@ -132,7 +103,7 @@ public class MembreEquipe extends JFrame {
 		
 		JLabel lblNewLabel = new JLabel("Candidats");
 		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		lblNewLabel.setBounds(668, 27, 92, 14);
+		lblNewLabel.setBounds(633, 30, 125, 20);
 		contentPane.add(lblNewLabel);
 		
 		
@@ -206,11 +177,15 @@ public class MembreEquipe extends JFrame {
 					}
 				}
 				catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Selectionner une personne");
+					
+					if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
+						JOptionPane.showMessageDialog(null, "Selectionner une personne");
+					else
+						e.printStackTrace();
 				}
 			}
 		});
-		btnNewButton.setBounds(413, 89, 89, 23);
+		btnNewButton.setBounds(400, 89, 100, 30);
 		contentPane.add(btnNewButton);
 		
 		JButton btnNewButton_1 = new JButton("Supprimer");
@@ -243,13 +218,16 @@ public class MembreEquipe extends JFrame {
 					}
 				}catch (Exception e) {
 					
-					e.printStackTrace();
-					JOptionPane.showMessageDialog(null, "Selectionner une personne");
+
+					if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
+						JOptionPane.showMessageDialog(null, "Selectionner une personne");
+					else
+						e.printStackTrace();
 				}
 					
 			}
 		});
-		btnNewButton_1.setBounds(413, 137, 89, 23);
+		btnNewButton_1.setBounds(400, 130, 100, 30);
 		contentPane.add(btnNewButton_1);
 
 

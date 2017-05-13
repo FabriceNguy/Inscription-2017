@@ -6,35 +6,29 @@ import inscriptions.Equipe;
 import inscriptions.Inscriptions;
 import inscriptions.Personne;
 
-import java.awt.List;
+
 import java.sql.Connection;
-import java.sql.Date;
+
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.time.LocalDate;
-import java.time.Month;
-import java.time.chrono.ChronoLocalDate;
+
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
+
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import com.mysql.jdbc.CallableStatement;
-import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
-//
-//CTRL + SHIFT + O pour générer les imports
+
 public class Connect {
 	
 	private Connection conn;
 	private Inscriptions inscriptions;
     private boolean locale = true;
-	private SortedSet<Personne> membres;
+
     public Connect() {
     	String url;
         String login= "root";
@@ -214,7 +208,26 @@ public class Connect {
 	 public void setMailPersonne(String mail,Personne personne) throws SQLIntegrityConstraintViolationException{
 	   requete("call SET_MAIL_PERSONNE('"+mail+"','"+personne.getIdCandidat()+"')");
 	 }
+	 public Set<Equipe> getEquipesCandidats(Personne personne){
+		 inscriptions = new Inscriptions();
 
+		 SortedSet<Equipe> equipes = new TreeSet<Equipe>();
+
+		 ResultSet rs =resultatRequete("SELECT NumCandidatEquipe, NomCandidat FROM etre_dans, candidat "
+		 		+ "WHERE NumCandidatPers = "+personne.getIdCandidat()+" "
+		 		+ "AND etre_dans.NumCandidatEquipe = candidat.NumCandidat ");
+		 try {
+			while(rs.next()){
+				Equipe equipe = new Equipe(inscriptions, rs.getString("NomCandidat"));
+				equipe.setIdCandidat(rs.getInt("NumCandidatEquipe"));
+				equipes.add(equipe);
+			 }
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		 
+		 return equipes;
+	 }
 
  /*Equipe*/
  	//Ajout d'une équipe à la BD
@@ -244,7 +257,6 @@ public class Connect {
 	 }
 	 public SortedSet<Personne> getMembresEquipe(Equipe equipe){
 		 inscriptions = new Inscriptions();
-		 SortedSet<Candidat> candidats = inscriptions.getCandidats();
 		 SortedSet<Personne> membres = new TreeSet<Personne>();
 
 		 ResultSet rs =resultatRequete("SELECT * FROM etre_dans,candidat, personne "

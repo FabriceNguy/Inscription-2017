@@ -7,13 +7,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Collections;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDate;
-import java.time.Month;
-import java.util.ArrayList;
+
+
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -408,7 +408,7 @@ public class Inscriptions implements Serializable
 	
 	public static void main(String[] args)
 	{
-		LocalDate date = LocalDate.of(2017,Month.APRIL,10);
+
 		Inscriptions inscriptions = Inscriptions.getInscriptions();
 		SortedSet<Candidat>candidats = inscriptions.getCandidats();
 		for (Candidat candidat : candidats) {

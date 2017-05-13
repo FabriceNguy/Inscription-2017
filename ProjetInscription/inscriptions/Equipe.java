@@ -1,8 +1,7 @@
 package inscriptions;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
+
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -18,7 +17,7 @@ public class Equipe extends Candidat
 {
 	private static final long serialVersionUID = 4147819927233466035L;
 	private SortedSet<Personne> membres = new TreeSet<>();
-	private static final boolean Serializable = false;
+
 	
 	public Equipe(Inscriptions inscriptions, String nom)
 	{

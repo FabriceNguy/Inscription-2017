@@ -3,10 +3,10 @@ package dialogueUtilisateur;
 
 import inscriptions.*;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
+
 import java.awt.EventQueue;
-import java.awt.List;
+
+
 
 
 
@@ -17,19 +17,11 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.JTable;
 import javax.swing.JButton;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-
 import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
-
 import java.util.SortedSet;
 
 import src.Connect;
@@ -38,15 +30,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 
+
 import javax.swing.JTabbedPane;
 
 
 import javax.swing.JScrollPane;
-
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+
 
 
 import java.awt.Choice;
@@ -54,7 +47,9 @@ import java.awt.Choice;
 
 
 
+
 import com.toedter.calendar.JDateChooser;
+
 
 
 import java.awt.event.MouseAdapter;
@@ -150,14 +145,14 @@ public class AppliFenetre extends JFrame {
 		};
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 879, 577);
+		setBounds(100, 100, 880, 570);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
 		setTitle("Application Inscription");
 		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setBounds(53, 109, 760, 401);
+		tabbedPane.setBounds(50, 110, 750, 399);
 		
 		JPanel panel_1 = new JPanel();
 		tabbedPane.addTab("Compétition", null, panel_1, null);
@@ -202,8 +197,8 @@ public class AppliFenetre extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 
 				boolean vide = false;
-
-
+				
+				
 				try{
 					Object[] row = new Object[4];
 
@@ -211,8 +206,8 @@ public class AppliFenetre extends JFrame {
 					String date = sdf.format(dateChooser.getDate());
 					DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 					LocalDate dateChoisie = LocalDate.parse(date, DATE_FORMAT);
-
-
+					
+					
 					if (textFieldNomComp.getText().isEmpty()){
 						vide = true;
 					}
@@ -241,12 +236,14 @@ public class AppliFenetre extends JFrame {
 							JOptionPane.showMessageDialog(null, messageExiste);
 						}
 					}
-					else{											
+					else{
+						JOptionPane.showMessageDialog(null, messageChampsVides);
 						System.out.println(messageChampsVides);			
 					}
 				}
 				catch (Exception e){
-					JOptionPane.showMessageDialog(null, messageChampsVides);
+					
+					
 				}
 			}
 		});
@@ -284,7 +281,10 @@ public class AppliFenetre extends JFrame {
 				}
 				
 				catch (Exception e) {
+				if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
 					JOptionPane.showMessageDialog(null, "Selectionner une compétition");
+				else	
+					e.printStackTrace();
 				}
 			}
 				
@@ -365,13 +365,6 @@ public class AppliFenetre extends JFrame {
 								competitionModif.setNom(textFieldNomComp.getText());
 								Connect connect = new Connect();
 								connect.setNameComp(textFieldNomComp.getText(), competitionModif.getId()); 
-								
-								competitionModif.setEnEquipe(EnEquipe);
-								connect.setEnEquipe(EnEquipe, competition.getId());
-								
-								competitionModif.setDateCloture(dateChoisie);
-						
-								connect.setDateComp(dateChoisie, competitionModif.getId()); 
 								connect.close();
 								modelCompetitions.setValueAt(textFieldNomComp.getText(), i, 1);
 
@@ -385,7 +378,8 @@ public class AppliFenetre extends JFrame {
 
 							Connect connect = new Connect();
 							competitionModif.setEnEquipe(EnEquipe);
-							
+							if( choiceEnequipe.getSelectedItem() != modelCompetitions.getValueAt(i, 3))
+								connect.delAllParticipation(competitionModif.getId());
 							connect.setEnEquipe(EnEquipe, competition.getId());
 							competition.setEnEquipe(EnEquipe);
 							competitionModif.setDateCloture(dateChoisie);
@@ -400,7 +394,10 @@ public class AppliFenetre extends JFrame {
 				}
 				catch (Exception e) {
 					System.out.println(e);
-					JOptionPane.showMessageDialog(null, "Selectionner une compétition");
+					if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
+						JOptionPane.showMessageDialog(null, "Selectionner une compétition");
+					else
+						e.printStackTrace();
 				}
 				
 			}
@@ -434,9 +431,11 @@ public class AppliFenetre extends JFrame {
 				}
 				catch (Exception e) {
 					//e.printStackTrace();
-
-				    JOptionPane.showMessageDialog(null, "Selectionner une competition pour voir les candidats inscrits ");
-				
+					e.printStackTrace();
+					if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
+						JOptionPane.showMessageDialog(null, "Selectionner une competition pour voir les candidats inscrits ");
+					else
+						e.printStackTrace();
 				    
 				}
 				
@@ -610,7 +609,11 @@ public class AppliFenetre extends JFrame {
 					}
 				}
 				catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Selectionner une equipe pour voir  ses membres");
+					e.printStackTrace();
+					if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
+						JOptionPane.showMessageDialog(null, "Selectionner une equipe pour voir  ses membres");
+					else
+						e.printStackTrace();
 				}
 			}
 		});
@@ -666,7 +669,10 @@ public class AppliFenetre extends JFrame {
 					
 				}
 				catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Selectionner une personne");
+					if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
+						JOptionPane.showMessageDialog(null, "Selectionner une personne");
+					else
+						e.printStackTrace();
 				}
 
 				
@@ -679,6 +685,37 @@ public class AppliFenetre extends JFrame {
 		panel.add(btnModifierPersonne);
 		
 		JButton btnPersonneEquipes = new JButton("Equipes");
+		btnPersonneEquipes.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				try{
+					int i = tablePersonnes.getSelectedRow();
+					Personne personneSelectionnee = null;
+					int idPersonneSelectionnee = (int)tablePersonnes.getValueAt(i, 0);
+					if(i >= 0){
+						
+						for (Iterator<Personne> iterator = personnes.iterator(); iterator
+								.hasNext();) {
+							
+							Personne personne = (Personne) iterator.next();
+							
+							if(personne.getIdCandidat() == idPersonneSelectionnee)
+								System.out.println(personne.getNom());
+								personneSelectionnee = personne;
+						}
+						CandidatEquipes  candidatEquipes = new CandidatEquipes(personneSelectionnee, inscriptions);
+						candidatEquipes.setVisible(true);
+					}
+				}
+				catch (Exception e) {
+					if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
+						JOptionPane.showMessageDialog(null, "Selectionner une personne pour voir  ses equipes");
+					else
+						e.printStackTrace();
+				}
+			
+			
+			}
+		});
 		btnPersonneEquipes.setBounds(450, 310, 250, 30);
 		panel.add(btnPersonneEquipes);
 		
@@ -804,7 +841,11 @@ public class AppliFenetre extends JFrame {
 					}
 				}
 				catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Selectionner une equipe");
+					
+					if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
+						JOptionPane.showMessageDialog(null, "Selectionner une equipe");
+					else
+						e.printStackTrace();
 				}
 			}
 		});
@@ -846,7 +887,11 @@ public class AppliFenetre extends JFrame {
 						}
 					}
 					catch (Exception e) {
-						JOptionPane.showMessageDialog(null, "Selectionner une equipe pour la modifier");
+						
+						if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
+							JOptionPane.showMessageDialog(null, "Selectionner une equipe pour la modifier");
+						else
+							e.printStackTrace();
 					}
 			
 			}
@@ -877,7 +922,11 @@ public class AppliFenetre extends JFrame {
 					}
 				}
 				catch (Exception e) {
-					JOptionPane.showMessageDialog(null, "Selectionner une equipe pour voir  ses membres");
+					
+					if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
+						JOptionPane.showMessageDialog(null, "Selectionner une equipe pour voir  ses membres");
+					else
+						e.printStackTrace();
 				}
 				
 			}

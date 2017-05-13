@@ -7,7 +7,6 @@ import inscriptions.Inscriptions;
 import inscriptions.Personne;
 
 
-import java.awt.EventQueue;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Iterator;
 import java.util.SortedSet;
@@ -28,6 +27,8 @@ import javax.swing.JButton;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 
 public class CandidatCompetition extends JFrame {
 
@@ -38,22 +39,6 @@ public class CandidatCompetition extends JFrame {
 	private JPanel contentPane;
 	private JTable tableInscrits;
 	private JTable tableCandidats;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-//					CandidatCompetition frame = new CandidatCompetition();
-					//frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
 
 	/**
 	 * Create the frame.
@@ -226,7 +211,7 @@ public class CandidatCompetition extends JFrame {
 					}
 				}
 				catch  (Exception e){
-					System.out.println(e);
+					
 					if (e instanceof SQLIntegrityConstraintViolationException) {
 						JOptionPane.showMessageDialog(null, "Déjà inscrit");
 				    }
@@ -265,7 +250,7 @@ public class CandidatCompetition extends JFrame {
 					
 				}
 				catch  (Exception e){
-					System.out.println(e);
+					
 					if (e instanceof SQLIntegrityConstraintViolationException) {
 						JOptionPane.showMessageDialog(null, "Déjà inscrit");
 				    }
@@ -278,5 +263,14 @@ public class CandidatCompetition extends JFrame {
 		});
 		btnDesincrire.setBounds(366, 153, 114, 23);
 		contentPane.add(btnDesincrire);
+		
+		JLabel lblNewLabel = new JLabel("Inscrits");
+		lblNewLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel.setBounds(160, 19, 46, 14);
+		contentPane.add(lblNewLabel);
+		
+		JLabel lblNewLabel_1 = new JLabel("Candidats");
+		lblNewLabel_1.setBounds(635, 19, 46, 14);
+		contentPane.add(lblNewLabel_1);
 	}
 }

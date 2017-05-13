@@ -1,13 +1,10 @@
 package inscriptions;
 
-import src.Connect;
-
 import java.io.Serializable;
-import java.util.Collections;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+
 import java.time.LocalDate;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 /**
@@ -19,10 +16,9 @@ import java.util.TreeSet;
 public class Competition implements Comparable<Competition>, Serializable
 {
 	private static final long serialVersionUID = -2882150118573759729L;
-	private static final boolean Serializable = false;
 	private Inscriptions inscriptions;
 	private String nom;
-	private Set<Candidat> candidats;
+	private SortedSet<Candidat> candidats;
 	private LocalDate dateCloture;
 	private boolean enEquipe;
 	private int id;
@@ -121,11 +117,7 @@ public class Competition implements Comparable<Competition>, Serializable
 	 */
 	
 	public Set<Candidat> getCandidats()
-	{
-		
-		Connect connect = new Connect();
-		this.candidats = connect.getCandidatsInscrits(this);
-		connect.close();
+	{		
 		return candidats;
 		
 	}
