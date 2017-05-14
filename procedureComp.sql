@@ -4,21 +4,13 @@ DELIMITER |
 	DROP PROCEDURE IF EXISTS GET_CANDIDATS_FROM_COMP;
 	create procedure GET_CANDIDATS_FROM_COMP(Num int)
 	begin
-		DECLARE une_Equipe boolean;
-		SELECT Equipe INTO une_Equipe FROM CANDIDAT WHERE NumCandidat = Num;
-		IF(!une_Equipe) THEN
-			SELECT NumCandidat, NomCandidat 
-			FROM PARTICIPER, CANDIDAT 
-			WHERE PARTICIPER.NumCandidat=CANDIDAT.NumCandidat 
-			AND NumComp = Num;
-		END IF;
-		IF(une_Equipe) THEN
+		
 			SELECT NumCandidat, NomCandidat, PrenomPersonne 
 			FROM PARTICIPER, CANDIDAT, PERSONNE 
 			WHERE PARTICIPER.NumCandidat=CANDIDAT.NumCandidat 
 			AND PERSONNE.NumCandidatPers=CANDIDAT.NumCandidat 
 			AND NumComp = Num;
-		END IF;
+
 	end;
 |
 /*fait*/

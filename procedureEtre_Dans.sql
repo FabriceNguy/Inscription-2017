@@ -5,12 +5,10 @@ DELIMITER |
 	DROP PROCEDURE IF EXISTS ADD_MEMBRE;
 	create procedure ADD_MEMBRE (Num_Equipe int,Num_Personne int) 
 	BEGIN
-		DECLARE etreUneEquipe boolean;
-		SELECT Equipe INTO etreUneEquipe FROM CANDIDAT WHERE NumCandidat = Num_Equipe; 
-		IF(etreUneEquipe) THEN
-			insert into ETRE_DANS(NumCandidatEquipe,NumCandidatPers) VALUES (Num_Equipe,Num_Personne); 
+
+		insert into ETRE_DANS(NumCandidatEquipe,NumCandidatPers) VALUES (Num_Equipe,Num_Personne); 
 		
-		END IF;
+
 	END;	
 |
 /*fait*/

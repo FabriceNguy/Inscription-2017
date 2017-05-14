@@ -211,7 +211,7 @@ public class CandidatCompetition extends JFrame {
 					}
 				}
 				catch  (Exception e){
-					
+					System.out.println(e);
 					if (e instanceof SQLIntegrityConstraintViolationException) {
 						JOptionPane.showMessageDialog(null, "Déjà inscrit");
 				    }
@@ -243,17 +243,27 @@ public class CandidatCompetition extends JFrame {
 							Connect connect = new Connect();
 							connect.delParticipation(personne.getIdCandidat(), competition.getId());
 							connect.close();
-							iterator.remove();	 
+							
 							modelInscrits.removeRow(i);
 						}	
 					}
-					
+					for (Iterator<Equipe> iterator = equipes.iterator(); iterator
+							.hasNext();) {
+								
+							Equipe equipe = (Equipe) iterator.next();
+								
+							if(equipe.getIdCandidat() == idCandidatSelectionnee){
+								
+								Connect connect = new Connect();
+								connect.delParticipation(equipe.getIdCandidat(), competition.getId());
+								connect.close();
+									 
+								modelInscrits.removeRow(i);
+							}	
+						}
 				}
 				catch  (Exception e){
-					
-					if (e instanceof SQLIntegrityConstraintViolationException) {
-						JOptionPane.showMessageDialog(null, "Déjà inscrit");
-				    }
+					System.out.println(e);
 					if( e instanceof ArrayIndexOutOfBoundsException)
 						JOptionPane.showMessageDialog(null, "Selectionner un candidat à désinscrire ");
 				
@@ -270,7 +280,8 @@ public class CandidatCompetition extends JFrame {
 		contentPane.add(lblNewLabel);
 		
 		JLabel lblNewLabel_1 = new JLabel("Candidats");
-		lblNewLabel_1.setBounds(635, 19, 46, 14);
+		lblNewLabel_1.setHorizontalAlignment(SwingConstants.CENTER);
+		lblNewLabel_1.setBounds(586, 19, 132, 14);
 		contentPane.add(lblNewLabel_1);
 	}
 }

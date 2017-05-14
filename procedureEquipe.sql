@@ -35,7 +35,7 @@ DELIMITER |
 	create procedure ADD_EQUIPE(NomCandidat  Varchar(25) )
 	BEGIN
 
-		insert into CANDIDAT(NumCandidat, NomCandidat, Equipe) values (null, NomCandidat, true) ;
+		insert into CANDIDAT(NumCandidat, NomCandidat) values (null, NomCandidat) ;
 	END;
 
 |

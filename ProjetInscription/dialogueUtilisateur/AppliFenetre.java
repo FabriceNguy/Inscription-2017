@@ -455,6 +455,8 @@ public class AppliFenetre extends JFrame {
 					System.out.println(e);
 					if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
 						JOptionPane.showMessageDialog(null, "Selectionner une compétition");
+					if(e instanceof java.lang.NullPointerException)
+						JOptionPane.showMessageDialog(null, messageChampsVides);
 					else
 						e.printStackTrace();
 				}
