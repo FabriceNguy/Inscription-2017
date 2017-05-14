@@ -152,8 +152,9 @@ public class MembreEquipe extends JFrame {
 							if(personne.getIdCandidat() == idPersonneSelectionnee){
 								
 								membres.add(personne);
-								Connect connect = new Connect();
+								
 								try{
+									Connect connect = new Connect();
 									connect.addMembreEquipe(equipe.getIdCandidat(), personne.getIdCandidat());
 									Object[] row = new Object[4];
 									row[0] = personne.getIdCandidat();
@@ -161,15 +162,14 @@ public class MembreEquipe extends JFrame {
 									row[2] = personne.getPrenom();
 									row[3] = personne.getMail();
 									modelMembres.addRow(row);
+									connect.close();
 								}
 								catch(SQLException e){
 									if (e instanceof SQLIntegrityConstraintViolationException) {
 										JOptionPane.showMessageDialog(null, "Déjà membre");
 								    } 
 									
-								}
-								connect.close();
-								
+								}																
 
 							}	
 						}
