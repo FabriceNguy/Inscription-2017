@@ -14,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
@@ -22,12 +23,13 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
 
+
 import src.Connect;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-public class CandidatEquipes extends JFrame {
+public class CandidatEquipes extends JDialog {
 
 	/**
 	 * 

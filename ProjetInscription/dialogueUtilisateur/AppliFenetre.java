@@ -3,8 +3,8 @@ package dialogueUtilisateur;
 
 import inscriptions.*;
 
-
 import java.awt.EventQueue;
+
 
 
 
@@ -31,6 +31,7 @@ import java.awt.event.ActionEvent;
 
 
 
+
 import javax.swing.JTabbedPane;
 
 
@@ -42,13 +43,13 @@ import javax.swing.SwingConstants;
 
 
 
+
 import java.awt.Choice;
 
 
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-
  import java.awt.EventQueue;
 import java.awt.List;
 
@@ -56,40 +57,43 @@ import java.awt.List;
  
  
 
+
  import javax.swing.JTable;
- import javax.swing.JButton;
+import javax.swing.JButton;
  
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
- import java.text.ParseException;
- import java.text.SimpleDateFormat;
- import java.time.LocalDate;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
  import java.time.format.DateTimeFormatter;
- import java.util.Iterator;
-
+import java.util.Iterator;
  import java.util.SortedSet;
  
+
  import src.Connect;
- import java.awt.event.ActionEvent;
+
+import java.awt.event.ActionEvent;
  
  
+
 
  import javax.swing.JTabbedPane;
  
  
  import javax.swing.JScrollPane;
-
  import javax.swing.JOptionPane;
- import javax.swing.JTextField;
- import javax.swing.JLabel;
- import javax.swing.SwingConstants;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
  
  
+
 
  import java.awt.Choice;
  
@@ -97,13 +101,16 @@ import java.sql.Statement;
  
  
 
+
  import com.toedter.calendar.JDateChooser;
  
  
 
+
  import java.awt.event.MouseAdapter;
- import java.awt.event.MouseEvent;
- import java.awt.Font;
+import java.awt.event.MouseEvent;
+import java.awt.Font;
+
 
 
 
@@ -111,9 +118,14 @@ import com.toedter.calendar.JDateChooser;
 
 
 
+
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.Font;
+
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JMenu;
 
 public class AppliFenetre extends JFrame {
 
@@ -205,6 +217,22 @@ public class AppliFenetre extends JFrame {
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 880, 570);
+		
+		JMenuBar menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		
+		JMenu mnNewMenu = new JMenu("Contact");
+		menuBar.add(mnNewMenu);
+		
+		JMenuItem mntmContacterUnCandidat = new JMenuItem("Contacter un candidat");
+		mntmContacterUnCandidat.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				Mail mail = new Mail();
+				mail.setModal(true);
+				mail.setVisible(true);
+			}
+		});
+		mnNewMenu.add(mntmContacterUnCandidat);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -487,6 +515,7 @@ public class AppliFenetre extends JFrame {
 						}
 						System.out.println(competitionSelectionnee.getId());
 						CandidatCompetition candidatCompetition = new CandidatCompetition(competitionSelectionnee, inscriptions);
+						candidatCompetition.setModal(true);
 						candidatCompetition.setVisible(true);
 					}
 				}
@@ -765,13 +794,15 @@ public class AppliFenetre extends JFrame {
 						}
 						System.out.println(personneSelectionnee.getIdCandidat()+""+personneSelectionnee.getNom());
 						CandidatEquipes  candidatEquipes = new CandidatEquipes(personneSelectionnee);
+						candidatEquipes.setModal(true);
 						candidatEquipes.setVisible(true);
 					}
 				}
 				catch (Exception e) {
-					if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
+					if(e instanceof java.lang.IndexOutOfBoundsException)
 						JOptionPane.showMessageDialog(null, "Selectionner une personne pour voir  ses equipes");
 					else
+							
 						e.printStackTrace();
 				}
 			
@@ -926,7 +957,7 @@ public class AppliFenetre extends JFrame {
 						
 						if(equipes.contains(equipe)){
 							existe =true;
-							JOptionPane.showMessageDialog(null, messageNonModifie);
+							JOptionPane.showMessageDialog(null, messageExiste);
 						}
 						if(textFieldNomEquipe.getText().trim().isEmpty()){
 							vide = true;
@@ -981,12 +1012,13 @@ public class AppliFenetre extends JFrame {
 						}
 						System.out.println(equipeSelectionnee.getIdCandidat());
 						MembreEquipe membreEquipe = new MembreEquipe(equipeSelectionnee);
+						membreEquipe.setModal(true);
 						membreEquipe.setVisible(true);
 					}
 				}
 				catch (Exception e) {
-					
-					if(e instanceof java.lang.ArrayIndexOutOfBoundsException)
+		
+					if(e instanceof java.lang.IndexOutOfBoundsException)
 						JOptionPane.showMessageDialog(null, "Selectionner une equipe pour voir  ses membres");
 					else
 						e.printStackTrace();

@@ -7,6 +7,7 @@ import inscriptions.Inscriptions;
 import inscriptions.Personne;
 
 
+
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Iterator;
 import java.util.SortedSet;
@@ -19,6 +20,7 @@ import javax.swing.table.DefaultTableModel;
 
 import src.Connect;
 
+import javax.swing.JDialog;
 import javax.swing.JTable;
 import javax.swing.JScrollPane;
 
@@ -27,10 +29,11 @@ import javax.swing.JButton;
 
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 
-public class CandidatCompetition extends JFrame {
+public class CandidatCompetition extends JDialog {
 
 	/**
 	 * 

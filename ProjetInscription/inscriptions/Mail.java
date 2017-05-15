@@ -12,6 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.mail.*;
 import javax.mail.internet.*;
+import javax.swing.JDialog;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -19,10 +20,15 @@ import javax.swing.JLabel;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.Choice;
+
 import javax.swing.SwingConstants;
 import javax.swing.JTextArea;
-public class Mail extends JFrame {
+public class Mail extends JDialog {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3148476096348832276L;
 	private JPanel contentPane;
 	private JTextField textSujet;
 	private final JLabel lblSujet = new JLabel("Sujet :");
