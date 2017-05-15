@@ -60,10 +60,13 @@ public class CandidatEquipes extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public CandidatEquipes(final Personne candidat, Inscriptions inscriptions) {
+	public CandidatEquipes(final Personne candidatEnvoye ) {
+		final Inscriptions inscriptions = new Inscriptions();
 		final SortedSet<Equipe> equipes = inscriptions.getEquipes();
-		final Set<Equipe> inscrits = candidat.getEquipes();
 		
+		final Personne candidat = new Personne(inscriptions, candidatEnvoye.getNom(), candidatEnvoye.getPrenom(), candidatEnvoye.getMail());
+		candidat.setIdCandidat(candidatEnvoye.getIdCandidat());
+		final Set<Equipe> inscrits = candidat.getEquipes();
 		setTitle("Equipes");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);

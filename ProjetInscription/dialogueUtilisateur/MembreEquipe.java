@@ -43,8 +43,11 @@ public class MembreEquipe extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public MembreEquipe(final Equipe equipe, Inscriptions inscription) {
+	public MembreEquipe(final Equipe equipeEnvoyé) {
 		setTitle("Membres");
+		Inscriptions inscription = new Inscriptions();
+		final Equipe equipe = new Equipe(inscription, equipeEnvoyé.getNom());
+		equipe.setIdCandidat(equipeEnvoyé.getIdCandidat());
 		final DefaultTableModel modelMembres= new DefaultTableModel(){
 			 /**
 			 * 

@@ -760,10 +760,11 @@ public class AppliFenetre extends JFrame {
 							Personne personne = (Personne) iterator.next();
 							
 							if(personne.getIdCandidat() == idPersonneSelectionnee)
-								System.out.println(personne.getNom());
+								
 								personneSelectionnee = personne;
 						}
-						CandidatEquipes  candidatEquipes = new CandidatEquipes(personneSelectionnee, inscriptions);
+						System.out.println(personneSelectionnee.getIdCandidat()+""+personneSelectionnee.getNom());
+						CandidatEquipes  candidatEquipes = new CandidatEquipes(personneSelectionnee);
 						candidatEquipes.setVisible(true);
 					}
 				}
@@ -978,7 +979,8 @@ public class AppliFenetre extends JFrame {
 							if(equipe.getIdCandidat() == idEquipeSelectionnee)
 								equipeSelectionnee = equipe;
 						}
-						MembreEquipe membreEquipe = new MembreEquipe(equipeSelectionnee, inscriptions);
+						System.out.println(equipeSelectionnee.getIdCandidat());
+						MembreEquipe membreEquipe = new MembreEquipe(equipeSelectionnee);
 						membreEquipe.setVisible(true);
 					}
 				}
