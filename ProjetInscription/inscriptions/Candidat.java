@@ -15,7 +15,7 @@ import src.Connect;
  *
  */
 
-public abstract class Candidat implements Comparable<Candidat>, Serializable
+public abstract class Candidat implements Comparable<Candidat>
 {
 	private static final long serialVersionUID = -6035399822298694746L;
 	private Inscriptions inscriptions;
@@ -100,11 +100,7 @@ public abstract class Candidat implements Comparable<Candidat>, Serializable
 		getInscriptions().remove(this);
 	}
 	
-	@Override
-	public int compareTo(Candidat o)
-	{
-		return getNom().compareTo(o.getNom());
-	}
+
 	
 	@Override
 	public String toString()
@@ -119,4 +115,12 @@ public abstract class Candidat implements Comparable<Candidat>, Serializable
 	public void setInscriptions(Inscriptions inscriptions) {
 		this.inscriptions = inscriptions;
 	}
+	@Override
+	public int compareTo(Candidat o) 
+	{
+		
+		return getIdCandidat()- o.getIdCandidat();
+	}
+
+
 }

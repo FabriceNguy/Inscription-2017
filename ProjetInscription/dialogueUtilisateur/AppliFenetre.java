@@ -10,6 +10,7 @@ import java.awt.EventQueue;
 
 
 
+
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
@@ -32,6 +33,7 @@ import java.awt.event.ActionEvent;
 
 
 
+
 import javax.swing.JTabbedPane;
 
 
@@ -44,13 +46,14 @@ import javax.swing.SwingConstants;
 
 
 
+
 import java.awt.Choice;
 
 
 
 import java.awt.BorderLayout;
 import java.awt.Color;
- import java.awt.EventQueue;
+import java.awt.EventQueue;
 import java.awt.List;
 
  
@@ -58,9 +61,11 @@ import java.awt.List;
  
 
 
+
  import javax.swing.JTable;
 import javax.swing.JButton;
  
+
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -71,10 +76,12 @@ import java.sql.Statement;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
- import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
- import java.util.SortedSet;
+import java.util.SortedSet;
  
+
+import java.util.TreeSet;
 
  import src.Connect;
 
@@ -83,16 +90,18 @@ import java.awt.event.ActionEvent;
  
 
 
+
  import javax.swing.JTabbedPane;
  
  
  import javax.swing.JScrollPane;
- import javax.swing.JOptionPane;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
  
  
+
 
 
  import java.awt.Choice;
@@ -102,9 +111,11 @@ import javax.swing.SwingConstants;
  
 
 
+
  import com.toedter.calendar.JDateChooser;
  
  
+
 
 
  import java.awt.event.MouseAdapter;
@@ -114,7 +125,9 @@ import java.awt.Font;
 
 
 
+
 import com.toedter.calendar.JDateChooser;
+
 
 
 
@@ -309,7 +322,7 @@ public class AppliFenetre extends JFrame {
 						}
 						Competition competition = inscriptions.createCompetition(textFieldNomComp.getText(), dateChoisie, choixFormulaire);
 						
-						if(!competitions.contains(competition)){
+						
 							competitions.add(competition);
 							row[0] = competition.getId();
 							row[1] = competition.getNom();
@@ -319,10 +332,7 @@ public class AppliFenetre extends JFrame {
 							else
 								row[3] = non;
 							modelCompetitions.addRow(row);
-						}
-						else{
-							JOptionPane.showMessageDialog(null, messageExiste);
-						}
+					
 					}
 					else{
 						JOptionPane.showMessageDialog(null, messageChampsVides);
@@ -420,7 +430,7 @@ public class AppliFenetre extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				try{
 					boolean vide = false;
-					boolean existe = false;
+				
 					boolean EnEquipe ;
 					int i = tableCompetitions.getSelectedRow();
 					
@@ -436,15 +446,12 @@ public class AppliFenetre extends JFrame {
 						EnEquipe = false;
 					}
 					Competition competition = new Competition(inscriptions, textFieldNomComp.getText(), dateChoisie, EnEquipe);
-					if(competitions.contains(competition)){
-						existe =true;
-						
-					}
+
 					if(textFieldNomComp.getText().trim().isEmpty()){
 						vide = true; 
 						JOptionPane.showMessageDialog(null, messageChampsVides);
 					}
-					if(!vide && !existe){
+					if(!vide){
 						
 						for (Iterator<Competition> iterator = competitions.iterator(); iterator
 								.hasNext();) {
@@ -453,31 +460,19 @@ public class AppliFenetre extends JFrame {
 								competitionModif.setNom(textFieldNomComp.getText());
 								Connect connect = new Connect();
 								connect.setNameComp(textFieldNomComp.getText(), competitionModif.getId()); 
+								connect.setEnEquipe(EnEquipe, competition.getId());
+								competition.setEnEquipe(EnEquipe);
+								competitionModif.setDateCloture(dateChoisie);
+						
+								connect.setDateComp(dateChoisie, competitionModif.getId()); 
+								connect.close();
 								connect.close();
 								modelCompetitions.setValueAt(textFieldNomComp.getText(), i, 1);
 
 							}
 						}
 					}
-					for (Iterator<Competition> iterator = competitions.iterator(); iterator
-							.hasNext();) {
-						Competition competitionModif = (Competition) iterator.next();
-						if(competitionModif.getId() == (int)modelCompetitions.getValueAt(i, 0)){
 
-							Connect connect = new Connect();
-							competitionModif.setEnEquipe(EnEquipe);
-							if( choiceEnequipe.getSelectedItem() != modelCompetitions.getValueAt(i, 3))
-								connect.delAllParticipation(competitionModif.getId());
-							connect.setEnEquipe(EnEquipe, competition.getId());
-							competition.setEnEquipe(EnEquipe);
-							competitionModif.setDateCloture(dateChoisie);
-					
-							connect.setDateComp(dateChoisie, competitionModif.getId()); 
-							connect.close();
-							modelCompetitions.setValueAt(choiceEnequipe.getSelectedItem(), i, 3);
-							modelCompetitions.setValueAt(dateChoisie, i, 2);
-						}
-					}
 										
 				}
 				catch (Exception e) {
@@ -718,13 +713,12 @@ public class AppliFenetre extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				try{
 					boolean vide = false;
-					boolean existe = false;
+
 					
 					int i = tablePersonnes.getSelectedRow();
+					System.out.println(textFieldPrenomPers.getText());
+
 					
-					Personne personne = new Personne(inscriptions, textFieldNomPers.getText(), 
-							textFieldPrenomPers.getText(), 
-							textFieldAdresseMail.getText());
 					if(textFieldAdresseMail.getText().trim().isEmpty() 
 							|| textFieldPrenomPers.getText().trim().isEmpty() 
 							|| textFieldNomPers.getText().trim().isEmpty()){
@@ -732,11 +726,8 @@ public class AppliFenetre extends JFrame {
 						JOptionPane.showMessageDialog(null, messageChampsVides);
 					}
 
-					if(personnes.contains(personne)){
-						existe = true;
-						JOptionPane.showMessageDialog(null, messageExiste);
-					}
-					if(!vide && ! existe){
+
+					if(!vide ){
 						
 						
 						for (Iterator<Personne> iterator = personnes.iterator(); iterator
@@ -897,9 +888,7 @@ public class AppliFenetre extends JFrame {
 						textFieldNomEquipe.setText(null);	
 						modelEquipes.addRow(row);
 					}
-					else{
-						JOptionPane.showMessageDialog(null, messageExiste);
-					}
+
 				}
 
 

@@ -1,8 +1,8 @@
 package inscriptions;
 
 import java.io.Serializable;
-
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -185,7 +185,9 @@ public class Competition implements Comparable<Competition>, Serializable
 	@Override
 	public int compareTo(Competition o)
 	{
-		return getNom().compareTo(o.getNom());
+		
+	
+		return getId()-o.getId();
 	}
 	
 	@Override
@@ -200,5 +202,13 @@ public class Competition implements Comparable<Competition>, Serializable
 
 	public void setId(int id) {
 		this.id = id;
+	}
+	public static void main(String[] args) {
+		Inscriptions inscriptions = new Inscriptions();
+		LocalDate date = LocalDate.of(2016,Month.APRIL,10);
+		LocalDate date2 = LocalDate.of(2017,Month.APRIL,10);
+		Competition competition = new  Competition(inscriptions, "lala", date, true);
+		Competition competition2 = new  Competition(inscriptions, "lala", date2, true);
+		System.out.println(competition.compareTo(competition2));
 	}
 }

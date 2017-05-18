@@ -351,5 +351,6 @@ public class Connect {
 	 public void delAllParticipation(int idComp) throws SQLIntegrityConstraintViolationException{
 		   requete("DELETE FROM participer WHERE NumComp ="+idComp+"");
 	}
+	 
 	
 }

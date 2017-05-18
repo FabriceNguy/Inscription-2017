@@ -1,7 +1,6 @@
 package inscriptions;
 
 import java.sql.SQLException;
-
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -13,7 +12,7 @@ import src.Connect;
  * 
  */
 
-public class Equipe extends Candidat
+public class Equipe extends Candidat 
 {
 	private static final long serialVersionUID = 4147819927233466035L;
 	private SortedSet<Personne> membres = new TreeSet<>();
@@ -72,10 +71,13 @@ public class Equipe extends Candidat
 	{
 		super.delete();
 	}
+
 	
 	@Override
 	public String toString()
 	{
 		return "Equipe " + super.toString();
 	}
+
+
 }
